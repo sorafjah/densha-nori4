@@ -141,7 +141,7 @@ rt{font-size:.5em;font-weight:400}
 </script>
 <!-- build: 2026-10-10f -->
 <div id="stage"></div>
-<div id="ver">v2026-10-10g</div>
+<div id="ver">v2026-10-10h</div>
 
 <div id="hud" hidden>
   <div id="clock" class="panel">
@@ -277,7 +277,7 @@ import * as THREE from 'three';
    設定（数値はここだけ直せば変わります）
    ========================================================= */
 const CFG = {
-  version: 'v2026-10-10g',
+  version: 'v2026-10-10h',
   timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
   ffScale: 4,            // 「はやおくり」中の倍率
   headway: 5,            // 電車の間隔（分）
@@ -501,12 +501,13 @@ function trackSignTex(L, dir, num, s, arrowRight) {
   const term = termName(L, dir); const col = LN(L).color;
   return canvasTex(768, 256, (g, w, h) => {
     g.fillStyle = '#1b2a4a'; g.fillRect(0, 0, w, h);
-    g.fillStyle = '#fff'; g.beginPath(); g.arc(110, 128, 82, 0, 7); g.fill();
-    g.fillStyle = '#1b2a4a'; g.font = `700 120px ${FONT}`; g.textAlign = 'center'; g.fillText(num, 110, 170);
-    g.fillStyle = col; g.fillRect(212, 36, 150, 54);
-    g.fillStyle = '#fff'; g.font = `700 34px ${FONT}`; fitText(g, SET.lines[L].name, 287, 76, 140);
-    nameKana(g, SET.stations[term].name + ' 方面', SET.stations[term].kana + ' ほうめん', 470, 170, 70);
-    g.font = `700 90px ${FONT}`; g.fillStyle = '#ffb020'; g.fillText(arrowRight ? '→' : '←', arrowRight ? 700 : 700, 160);
+    const o = arrowRight ? 0 : 96; // 左むきの矢印は いちばん左に おく
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(100 + o, 128, 76, 0, 7); g.fill();
+    g.fillStyle = '#1b2a4a'; g.font = `700 112px ${FONT}`; g.textAlign = 'center'; g.fillText(num, 100 + o, 168);
+    g.fillStyle = col; g.fillRect(194 + o, 36, 140, 54);
+    g.fillStyle = '#fff'; g.font = `700 34px ${FONT}`; fitText(g, SET.lines[L].name, 264 + o, 76, 130);
+    nameKana(g, SET.stations[term].name + ' 方面', SET.stations[term].kana + ' ほうめん', 446 + o, 170, 66);
+    g.font = `700 90px ${FONT}`; g.fillStyle = '#ffb020'; g.textAlign = 'center'; g.fillText(arrowRight ? '→' : '←', arrowRight ? 708 : 56, 160);
   });
 }
 function nameBoardTex(s, L, rightIsPlus) {
@@ -643,7 +644,7 @@ function buildStation(sId) {
     box(0.15, 1.1, 13.4, '#8c95a6', cx + 1.55, 4.6, 12, g).rotation.x = Math.atan2(6, 12);
     // 動ける場所（下：ホーム）
     st.lower.push({ x0: cx - 2.75, x1: cx + 2.75, z0: -44, z1: 6 }, { x0: cx - 2.75, x1: cx + 2.75, z0: 18, z1: 44 },
-      { x0: cx - 2.75, x1: cx - 1.85, z0: 6, z1: 18 }, { x0: cx + 1.85, x1: cx + 2.75, z0: 6, z1: 18 });
+      { x0: cx - 2.75, x1: cx - 1.3, z0: 6, z1: 18 }, { x0: cx + 1.3, x1: cx + 2.75, z0: 6, z1: 18 });
     st.stairs.push({ x0: cx - 1.35, x1: cx + 1.35, z0: 5.4, z1: 18.6, cx });
     // 発車標
     for (const dir of [1, -1]) { const bt = depBoardTex(sId, L, dir); st.boards.push(bt); plane(bt, 3.3, 2.06, g, cx + dir * 1.72, 10.4, 5.75, Math.PI); }
@@ -697,8 +698,8 @@ const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, 
   plane(RIDE.panelTex, 3.2, 0.8, g, 1.57, 3.56, 0, -Math.PI / 2);
   for (const z of [-9, -3, 3, 9]) box(0.08, 3, 0.08, '#c9ced6', 0.9, 2.5, z, g);
   box(0.6, 0.05, 28, '#fff8d8', 0, 3.94, 0, g);
-  [['#6d8fb8', -5.6], ['#c46b6b', 4.2], ['#7fae7a', 8.6]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.15, 0.9, z); p.rotation.y = -Math.PI / 2; sitPose(p); g.add(p); });
-  RIDE.me = makePerson('#f07a2a', { bag: '#2c3f66' }); RIDE.me.position.set(1.15, 0.9, -1.95); RIDE.me.rotation.y = -Math.PI / 2; sitPose(RIDE.me); g.add(RIDE.me);
+  [['#6d8fb8', -5.6], ['#c46b6b', 4.2], ['#7fae7a', 8.6]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.1, 1.0, z); p.rotation.y = -Math.PI / 2; sitPose(p); g.add(p); });
+  RIDE.me = makePerson('#f07a2a', { bag: '#2c3f66' }); RIDE.me.position.set(1.0, 1.0, -1.95); RIDE.me.rotation.y = -Math.PI / 2; sitPose(RIDE.me); g.add(RIDE.me);
   box(400, 0.2, 400, '#9aa58e', 0, -0.4, 0, g);
   let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 40; i++) { const h = 3 + rnd() * 16, w = 4 + rnd() * 6; const z0 = -150 + i * 7.5; const b = building(g, 10 + rnd() * 40, z0, w, h + 3, i); b.position.y = -0.3; b.userData.z0 = z0; RIDE.outside.push(b); }
@@ -716,26 +717,26 @@ function drawPanel(g, w, h) {
   g.fillStyle = '#1f2b45'; g.fillRect(0, 0, w, h);
   const S = RIDE.ps; if (!S) return;
   const L = S.L, st = LN(L).stations, col = LN(L).color;
-  g.fillStyle = col; g.fillRect(0, 0, w, 120);
-  g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 32px ${FONT}`; g.fillText(SET.lines[L].name, 24, 46);
-  g.font = `700 70px ${FONT}`; fitText(g, SET.stations[termName(L, S.dir)].name + ' ゆき', 24, 106, 760);
-  g.textAlign = 'right'; g.font = `700 30px ${FONT}`; g.fillText('いまの じこく', w - 24, 40);
-  g.font = `700 70px ${FONT}`; g.fillText(fm(G.t), w - 24, 106);
+  g.fillStyle = col; g.fillRect(0, 0, w, 100);
+  g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 28px ${FONT}`; g.fillText(SET.lines[L].name, 24, 36);
+  g.font = `700 52px ${FONT}`; fitText(g, SET.stations[termName(L, S.dir)].name + ' ゆき', 24, 90, 760);
+  g.textAlign = 'right'; g.font = `700 26px ${FONT}`; g.fillText('いまの じこく', w - 24, 34);
+  g.font = `700 52px ${FONT}`; g.fillText(fm(G.t), w - 24, 90);
   g.textAlign = 'left'; g.fillStyle = '#ffd27a'; g.font = `700 34px ${FONT}`;
   const lab = S.stopped ? (S.end ? 'しゅうてん' : 'ただいま') : 'つぎは';
-  g.fillText(lab, 30, 172); const lw = g.measureText(lab).width;
-  g.fillStyle = '#fff'; g.font = `700 44px ${FONT}`; g.fillText(SET.stations[st[S.i]].name, 50 + lw, 174);
-  const order = st, n = order.length, x0 = 70, x1 = w - 70, y = 236;
+  g.fillText(lab, 30, 148); const lw = g.measureText(lab).width;
+  g.fillStyle = '#fff'; g.font = `700 44px ${FONT}`; g.fillText(SET.stations[st[S.i]].name, 50 + lw, 150);
+  const order = st, n = order.length, x0 = 70, x1 = w - 70, y = 202;
   g.strokeStyle = col; g.lineWidth = 8; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
   const ci = order.indexOf(st[S.i]);
   order.forEach((s, j) => {
     const x = x0 + (x1 - x0) * j / (n - 1), cur = j === ci, past = S.dir > 0 ? j < ci : j > ci;
     g.beginPath(); g.arc(x, y, cur ? 16 : 11, 0, 7); g.fillStyle = cur ? '#ffd27a' : (past ? '#6b7690' : '#fff'); g.fill(); g.lineWidth = 5; g.strokeStyle = col; g.stroke();
-    g.textAlign = 'center'; g.fillStyle = cur ? '#ffd27a' : (past ? '#8a93a8' : '#fff'); g.font = `${cur ? 700 : 400} 26px ${FONT}`;
-    fitText(g, SET.stations[s].name, x, y + 50, (x1 - x0) / (n - 1) - 8);
+    g.textAlign = 'center'; g.fillStyle = cur ? '#ffd27a' : (past ? '#8a93a8' : '#fff'); g.font = `${cur ? 700 : 600} 40px ${FONT}`;
+    fitText(g, SET.stations[s].name, x, y + 66, (x1 - x0) / (n - 1) - 8);
   });
   g.fillStyle = '#ffd27a'; g.font = `700 28px ${FONT}`;
-  if (S.dir > 0) { g.textAlign = 'right'; g.fillText('すすむ むき ▶', x1, 182); } else { g.textAlign = 'right'; g.fillText('◀ すすむ むき', x1, 182); }
+  if (S.dir > 0) { g.textAlign = 'right'; g.fillText('すすむ むき ▶', x1, 150); } else { g.textAlign = 'right'; g.fillText('◀ すすむ むき', x1, 150); }
 }
 
 /* =========================================================
@@ -1041,13 +1042,21 @@ $('#btnResMenu').onclick = () => { closeOv('ovResult'); G.phase = 'title'; G.mis
 function pickMission() {
   const r = a => a[Math.floor(Math.random() * a.length)];
   const inner = L => LN(L).stations.filter((s, i) => i > 0 && i < LN(L).stations.length - 1 && s !== TRANSFER);
+  const event = r(CFG.events);
   let from, to;
+  for (let tries = 0; tries < 300; tries++) {
   if (G.level === 1) {
     const pairs = [];
     for (const L of LINE_ORDER) for (const a of inner(L)) for (const b of inner(L)) { const d = Math.abs(idxOf(a, L) - idxOf(b, L)); if (d >= 2 && d <= 4) pairs.push([a, b]); }
     [from, to] = r(pairs);
   } else { const L1 = r(LINE_ORDER), L2 = LINE_ORDER.find(L => L !== L1); from = r(inner(L1)); to = r(inner(L2)); }
-  return { from, to, start: CFG.startBase[G.sceneKey] + Math.floor(Math.random() * CFG.startSpread), event: r(CFG.events) };
+    if (event !== 'doze' || G.easy) break;
+    // 寝すごした先が終点だと「どっち行き？」を考えなくてよくなるので、さける
+    const Lt = LINE_ORDER.find(L => idxOf(to, L) >= 0); // 乗りかえ駅以外は1つの路線だけ
+    const st0 = G.level === 1 ? from : TRANSFER, ia = idxOf(st0, Lt), ib = idxOf(to, Lt), nx = ib + Math.sign(ib - ia);
+    if (nx > 0 && nx < LN(Lt).stations.length - 1) break;
+  }
+  return { from, to, start: CFG.startBase[G.sceneKey] + Math.floor(Math.random() * CFG.startSpread), event };
 }
 function startMission() {
   if (station) station.group.visible = true;
@@ -1267,7 +1276,7 @@ function update(dtReal) {
     let guard = 0;
     while (guard++ < 20) {
       const arr = arrT(R.L, R.dir, R.k, R.i), dep = arr + CFG.dwellMin;
-      if (R.i === endIdx(R.L, R.dir)) { if (G.t >= arr + 0.15 && !G.dozing) { alight(true); return; } break; }
+      if (R.i === endIdx(R.L, R.dir)) { if (G.t >= arr + 0.15 && !G.dozing && !R.endNotice) { R.endNotice = true; banner('{終点|しゅうてん}です。「おりる」を おして おりよう', 'info', 6); } break; }
       if (G.easy && !G.dozing && !R.wrongCounted && R.i === targetIdx(R.L) && R.i !== R.boardedAt && G.t >= arr && G.t >= dep - DOOR_SHUT_BEFORE - DOOR_MOVE - 0.05) { alight(true); banner('{駅員|えきいん}さん「ここで おりますよ！」', 'info', 4); return; }
       if (G.t >= dep) { rideDepart(R.i); R.i += R.dir; continue; }
       break;
@@ -1301,7 +1310,8 @@ function updateRideView(dtReal) {
   if (stopped) { pz = 0; ps = st[R.i]; }
   else if (hasPrev && G.t - depPrev < 0.35) { pz = -R.dir * Math.pow((G.t - depPrev) / 0.35, 2) * 70; ps = st[prevI]; }
   else if (arr - G.t < 0.35) { pz = R.dir * Math.pow((arr - G.t) / 0.35, 2) * 70; ps = st[R.i]; }
-  const dt = RIDE.door; dt.p = stopped ? doorP(arr, dep) : 0;
+  const atEnd = R.i === endIdx(L, R.dir);
+  const dt = RIDE.door; dt.p = stopped ? doorP(arr, atEnd ? 1e9 : dep) : 0;
   const e = dt.p * dt.p * (3 - 2 * dt.p) * 0.75; dt.l.position.z = -0.4 - e; dt.r.position.z = 0.4 + e;
   RIDE.plat.visible = pz != null; if (ps) { RIDE.plat.position.z = pz; setRideSign(ps, L); }
   // ドアの上の表示
@@ -1326,7 +1336,7 @@ function updateHUD() {
     else if (nearStaff()) a = ['ask', 'きく'];
   } else if (G.phase === 'ride' && !G.dozing) {
     const R = G.ride; const arr = arrT(R.L, R.dir, R.k, R.i);
-    if (doorsOpenEnough(arr, arr + CFG.dwellMin) && R.i !== endIdx(R.L, R.dir)) a = ['alight', 'おりる'];
+    if (doorsOpenEnough(arr, R.i === endIdx(R.L, R.dir) ? 1e9 : arr + CFG.dwellMin)) a = ['alight', 'おりる'];
   }
   if (a) { if (act.dataset.k !== a[0]) { act.dataset.k = a[0]; act.className = a[0]; act.textContent = a[1]; } act.hidden = false; }
   else { act.hidden = true; act.dataset.k = ''; }
