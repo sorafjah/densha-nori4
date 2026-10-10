@@ -141,7 +141,7 @@ rt{font-size:.5em;font-weight:400}
 </script>
 <!-- build: 2026-10-10f -->
 <div id="stage"></div>
-<div id="ver">v2026-10-10h</div>
+<div id="ver">v2026-10-10i</div>
 
 <div id="hud" hidden>
   <div id="clock" class="panel">
@@ -277,7 +277,7 @@ import * as THREE from 'three';
    設定（数値はここだけ直せば変わります）
    ========================================================= */
 const CFG = {
-  version: 'v2026-10-10h',
+  version: 'v2026-10-10i',
   timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
   ffScale: 4,            // 「はやおくり」中の倍率
   headway: 5,            // 電車の間隔（分）
@@ -290,7 +290,7 @@ const CFG = {
   walkSpeed: 6.5,
   // 困り度（1分あたりの増え方）
   rateUnreported: 3.0,                  // トラブル中で、まだ伝えていない
-  rateByQuality: [3.0, 1.8, 1.2, 0.8, 0.5, 0.3], // 伝えた内容の数（0〜5つ）ごと
+  rateByQuality: [3.0, 1.4, 0.7, 0.3], // 伝えた内容の数（0〜3つ）ごと
   latePerMin: 1.0,       // 遅れた1分あたり
   noContactPenalty: 20,  // 一度も連絡しないまま遅れて着いた
   worryAt: [3, 8],       // 相手が心配しはじめる（トラブルから何分）
@@ -785,7 +785,7 @@ renderHowto($('#howto1')); renderHowto($('#howto2'));
 function renderChoices() {
   const sc = [['school', '{学校|がっこう}へ{行|い}く', '{担任|たんにん}の{先生|せんせい}に {連絡|れんらく}'], ['work', '{職場|しょくば}{体験|たいけん}', '{職場|しょくば}の{人|ひと}に {連絡|れんらく}']];
   $('#chScene').innerHTML = sc.map(([k, a, b]) => `<button class="choice ${G.sceneKey === k ? 'sel' : ''}" data-k="${k}"><b>${rb(a)}</b>${rb(b)}</button>`).join('');
-  const lv = [[1, 'レベル1', '{乗|の}りかえなし（1つの{電車|でんしゃ}）'], [2, 'レベル2', '{乗|の}りかえ 1{回|かい}']];
+  const lv = [[1, 'レベル1', '{乗|の}りかえなし'], [2, 'レベル2', '{乗|の}りかえ 1{回|かい}']];
   const md = [[true, 'かんたん'], [false, 'ふつう']];
   $('#chMode').innerHTML = md.map(([k, a]) => `<button class="choice ${G.easy === k ? 'sel' : ''}" data-m="${k}"><b>${a}</b></button>`).join('');
   $('#chLevel').innerHTML = lv.map(([k, a, b]) => `<button class="choice ${G.level === k ? 'sel' : ''}" data-l="${k}"><b>${a}</b>${rb(b)}</button>`).join('');
@@ -806,7 +806,7 @@ function contactSVG(mood) {
     : '<rect x="0" y="0" width="150" height="130" rx="12" fill="#e5efe2"/><rect x="10" y="10" width="130" height="44" rx="4" fill="#2f5a43"/><path d="M22 26h30M22 36h50" stroke="#e8f0e8" stroke-width="3"/><circle cx="128" cy="68" r="10" fill="#fff" stroke="#555" stroke-width="2"/><path d="M128 68v-6M128 68h5" stroke="#555" stroke-width="2"/>';
   const body = work ? '<path d="M38 130c0-26 16-40 37-40s37 14 37 40z" fill="#fff"/><path d="M55 96h40v34H55z" fill="#d9822b"/><path d="M60 92l15 10 15-10" fill="none" stroke="#d9822b" stroke-width="5"/>'
     : '<path d="M38 130c0-26 16-40 37-40s37 14 37 40z" fill="#5a7bb5"/><path d="M68 92l7 14 7-14" fill="#fff"/>';
-  const hair = work ? '<path d="M51 58c0-20 48-20 48 0v-6c0-18-48-18-48 0z" fill="#3a2a20"/><rect x="50" y="44" width="50" height="9" rx="4" fill="#d9822b"/>' : '<path d="M50 62c-2-26 52-26 50 0c-6-12-38-14-50 0z" fill="#2b2420"/>';
+  const hair = work ? '<path d="M51 70c-3-30 51-30 48 0c-2-8-6-12-10-14c-8 3-20 3-28 0c-4 2-8 6-10 14z" fill="#4a4038"/><path d="M50 72q-3 6 2 9M100 72q3 6-2 9" stroke="#4a4038" stroke-width="4" fill="none"/>' : '<path d="M50 62c-2-26 52-26 50 0c-6-12-38-14-50 0z" fill="#2b2420"/>';
   const face = {
     wait: '<circle cx="66" cy="70" r="3"/><circle cx="84" cy="70" r="3"/><path d="M68 84h14" stroke="#333" stroke-width="3" fill="none"/><text x="112" y="70" font-size="26" font-weight="700" fill="#2c3f66">?</text>',
     worry: '<path d="M60 62l10 4M90 62l-10 4" stroke="#333" stroke-width="3"/><circle cx="66" cy="72" r="3"/><circle cx="84" cy="72" r="3"/><path d="M67 88q8-7 16 0" stroke="#333" stroke-width="3" fill="none"/><path d="M100 58q5 8 0 12q-5-4 0-12z" fill="#7cc3f0"/>',
@@ -906,26 +906,32 @@ function planOpts(here) {
 function openPhone(incoming) {
   const here = G.phase === 'ride' ? null : station.id;
   const where = G.phase === 'ride' ? { txt: `${ln(G.ride.L)}の {電車|でんしゃ}の{中|なか}です`, ok: true } : { txt: `${sn(here)}{駅|えき}に います`, ok: true };
-  const others = shuffle(Object.keys(SET.stations).filter(s => s !== here && s !== G.mission.to)).slice(0, 2).map(s => ({ txt: `${sn(s)}{駅|えき}に います`, ok: false }));
+  const other = shuffle(Object.keys(SET.stations).filter(s => s !== here && s !== G.mission.to))[0];
+  const wrongWhere = { txt: `${sn(other)}{駅|えき}に います`, ok: false, why: 'あれ？ いま どこに いるの？' };
+  const vague = G.phase === 'ride' ? { txt: '{電車|でんしゃ}の{中|なか}です（どこかは よく わかりません）', ok: true, vague: true } : { txt: '{駅|えき}に います（{駅|えき}の{名前|なまえ}は よく わかりません）', ok: true, vague: true };
   const NONE = { txt: '（いわない）', ok: false, none: true };
   const school = SET.people.school ? esc(SET.people.school) + 'の ' : '';
   const me = SET.people.player ? esc(SET.people.player) : '（じぶんの{名前|なまえ}）';
+  const sorry = G.sceneKey === 'school' ? 'おくれて ごめんなさい' : 'おくれて すみません';
+  const lateN = G.delay && G.delayAnnounced ? G.delay.min : null;
+  const lateTxt = lateN ? `${minTxt(lateN)}くらい おくれます` : '{少|すこ}し おくれます';
+  const plans = planOpts(here).map(o => o.ok ? { txt: `${lateTxt}。${o.txt}`, ok: true, n: lateN } : { txt: o.txt, ok: false, why: 'おくれそうなの？ これから どうするの？' });
   PH = { incoming, sel: {}, rows: [
-    { key: 'name', lab: 'だれ？（{名前|なまえ}）', opts: [{ txt: `${school}${me}です`, ok: true }, NONE] },
-    { key: 'where', lab: 'いま どこ？', opts: [...shuffle([where, ...others]), NONE] },
-    { key: 'sorry', lab: 'あやまる', opts: [...(G.sceneKey === 'school' ? [{ txt: 'おくれて ごめんなさい', ok: true }, { txt: '{心配|しんぱい}を かけて ごめんなさい', ok: true }] : [{ txt: 'おくれて すみません', ok: true }, { txt: '{心配|しんぱい}を おかけして すみません', ok: true }]), NONE] },
-    { key: 'late', lab: 'おくれることを つたえる', opts: [...(G.delay && G.delayAnnounced ? [{ txt: `${minTxt(G.delay.min)}くらい おくれます`, ok: true }] : []), { txt: '{少|すこ}し おくれます', ok: true }, { txt: 'おくれます（{何分|なんぷん}かは わかりません）', ok: true }, NONE] },
-    { key: 'plan', lab: 'これから どうする？', opts: planOpts(here).concat([NONE]) },
+    { key: 'greet', lab: '{名前|なまえ}と あやまる', opts: [{ txt: `${school}${me}です。${sorry}`, ok: true }, { txt: `${school}${me}です`, ok: false, why: '「おくれて ごめんなさい」も あると いいね' }, { ...NONE, why: 'だれから？ {名前|なまえ}も {言|い}ってね' }] },
+    { key: 'where', lab: 'いま どこ？', opts: [...shuffle([where, wrongWhere, vague]), { ...NONE, why: 'いま どこに いるの？' }] },
+    { key: 'next', lab: 'おくれることと これから', opts: [...plans, { ...NONE, why: 'おくれそうなの？ これから どうするの？' }] },
   ] };
+  if (G.easy) PH.rows.forEach(r => { PH.sel[r.key] = r.opts.findIndex(o => o.ok && !o.vague); });
   $('#phWho').innerHTML = rb(`${contactMk()} ${incoming ? 'から {電話|でんわ}' : 'に {連絡|れんらく}'}`);
   const ask = $('#phAsk'); ask.hidden = !incoming;
   ask.innerHTML = rb(`「もしもし、${contactMk()}です。まだ {着|つ}いていないけど、だいじょうぶ？」`);
   renderPhone(); openOv('ovPhone');
 }
 function renderPhone() {
+  $('#phRows').hidden = G.easy;
   $('#phRows').innerHTML = PH.rows.map(r => `<div class="prow"><div class="lab">${rb(r.lab)}</div><div class="opts">${r.opts.map((o, i) => `<button class="opt ${o.none ? 'none' : ''} ${PH.sel[r.key] === i ? 'sel' : ''}" data-r="${r.key}" data-i="${i}">${rb(o.txt)}</button>`).join('')}</div></div>`).join('');
   const parts = PH.rows.map(r => PH.sel[r.key] != null && !r.opts[PH.sel[r.key]].none ? r.opts[PH.sel[r.key]].txt : '').filter(Boolean);
-  $('#phPrev').innerHTML = parts.length ? rb((PH.incoming ? '' : 'もしもし。') + parts.join('。') + '。') : rb('<span style="color:#888">うえから えらんでね</span>');
+  $('#phPrev').innerHTML = parts.length ? rb((PH.incoming ? '' : 'もしもし。') + parts.join('。') + '。') + (G.easy ? `<div style="font-size:15px;color:#5b6b88;margin-top:6px">${rb('「つたえる」を おすと、この ないようで {話|はな}します')}</div>` : '') : rb('<span style="color:#888">うえから えらんでね</span>');
 }
 $('#phRows').addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b) return; PH.sel[b.dataset.r] = +b.dataset.i; SND.tap(); renderPhone(); });
 $('#btnPhCancel').onclick = () => { if (PH.incoming) { banner('{電話|でんわ}は きれません。つたえる ことを えらんでね', 'call', 3); return; } closeOv('ovPhone'); };
@@ -936,22 +942,22 @@ $('#btnPhSend').onclick = () => {
 function report(items, incoming) {
   const q = items.filter(i => i.ok).length;
   const active = G.firstTroubleT != null && G.exitT == null;
-  let msg;
+  let msg, tip = '';
   if (!active) {
     msg = G.sceneKey === 'school' ? '{予定|よてい}どおりなら、{連絡|れんらく}は いらないよ。{気|き}をつけて {来|き}てね。' : '{予定|よてい}どおりでしたら、{大丈夫|だいじょうぶ}ですよ。お{待|ま}ちしています。';
   } else {
     G.reportedOk = true; G.quality = q;
-    showContact('happy', q >= 4 ? 'わかった。あんしんした' : 'わかった。ありがとう', 5);
-    const late = items.find(i => i.key === 'late');
+    showContact('happy', q >= 3 ? 'わかった。あんしんした' : 'わかった。ありがとう', 5);
+    const late = items.find(i => i.key === 'next');
     G.reports.push({ t: G.t, q, est: late && late.n, incoming, sinceTrouble: G.t - G.lastTroubleT });
-    const miss = items.filter(i => !i.ok).map(i => i.key);
-    const need = { sorry: 'おくれて ごめんなさいは？', name: 'だれから？ {名前|なまえ}も {言|い}ってね', where: 'いま どこに いるの？', late: 'おくれそうなの？', plan: 'これから どうするの？' };
-    if (q === 5) msg = G.sceneKey === 'school' ? 'よく わかりました。{連絡|れんらく}ありがとう。あわてず、{気|き}をつけて {来|き}てね。' : 'ご{連絡|れんらく} ありがとうございます。よく わかりました。{気|き}をつけて {来|き}てください。';
-    else msg = 'わかった、ありがとう。でも…<br>' + miss.map(k => '・' + need[k]).join('<br>') + '<br><span style="font-size:15px;color:#5b6b88">（つたえることが そろうと、まっている {人|ひと}が あんしんします）</span>';
+    const miss = items.filter(i => !i.ok).map(i => i.why);
+    tip = items.some(i => i.vague) ? '<br><span style="font-size:16px">（{駅|えき}の {名前|なまえ}が わからない ときは、ホームの かんばんを {見|み}るか、{駅員|えきいん}さんに きいてね）</span>' : '';
+    if (q === 3) msg = G.sceneKey === 'school' ? 'よく わかりました。{連絡|れんらく}ありがとう。あわてず、{気|き}をつけて {来|き}てね。' : 'ご{連絡|れんらく} ありがとうございます。よく わかりました。{気|き}をつけて {来|き}てください。';
+    else msg = 'わかった、ありがとう。でも…<br>' + miss.map(k => '・' + k).join('<br>') + '<br><span style="font-size:15px;color:#5b6b88">（つたえることが そろうと、まっている {人|ひと}が あんしんします）</span>';
     SND.ok();
   }
   $('#rpWho').innerHTML = rb(contactFull());
-  $('#rpText').innerHTML = rb(msg); openOv('ovReply');
+  $('#rpText').innerHTML = rb(msg + tip); openOv('ovReply');
 }
 $('#btnRpClose').onclick = () => closeOv('ovReply');
 $('#btnPhone').onclick = () => { if (G.phase === 'station' || G.phase === 'ride') { $('#btnPhone').classList.remove('ring'); openPhone(false); } };
@@ -1001,21 +1007,21 @@ const KIND = {
   doze: 'うとうとして おりる {駅|えき}を {通|とお}りすぎた', delay: '{電車|でんしゃ}が おくれた（{信号|しんごう}{点検|てんけん}）',
 };
 function finish(timeout) {
-  G.exitT = G.t; G.timeout = timeout; G.phase = 'result'; G.ff = false;
+  G.exitT = G.exiting ? G.gateT : G.t; G.exiting = false; G.timeout = timeout; G.phase = 'result'; G.ff = false;
   const late = Math.max(0, G.exitT - G.plan.deadline);
   const lateP = timeout ? 0 : late * CFG.latePerMin;
   const hadT = G.firstTroubleT != null;
   const noRep = hadT && G.reports.length === 0;
   const actual = G.damage + lateP + (noRep && !timeout ? CFG.noContactPenalty : 0);
   const tm = hadT ? G.exitT - G.firstTroubleT : 0;
-  const best = tm * CFG.rateByQuality[5] + lateP, worst = tm * CFG.rateUnreported + lateP + CFG.noContactPenalty;
+  const best = tm * CFG.rateByQuality[3] + lateP, worst = tm * CFG.rateUnreported + lateP + CFG.noContactPenalty;
   G.result = { late, actual, best, worst, tm };
   $('#resTitle').innerHTML = rb(timeout ? '{時間|じかん}{切|ぎ}れ…' : (late > 0.05 ? `とうちゃく！（${minTxt(Math.ceil(late))} おくれ）` : 'とうちゃく！ {間|ま}に{合|あ}った'));
   const r1 = G.reports[0];
   const rows = [
     ['{改札|かいさつ}を{出|で}た', timeout ? '—' : `${fm(G.exitT)}（しめきり ${fm(G.plan.deadline)}）`],
     ['トラブル', hadT ? G.troubles.map(t => `${fm(t.t)} ${KIND[t.kind]}`).join('<br>') : 'なし'],
-    ['{連絡|れんらく}', !hadT ? '（ひつようなし）' : r1 ? `トラブルから ${minTxt(Math.max(0, Math.round(r1.sinceTrouble)))}あと${r1.incoming ? '（{相手|あいて}からの {電話|でんわ}）' : ''}<br>つたえたこと ${'●'.repeat(r1.q)}${'○'.repeat(5 - r1.q)}（5つ{中|ちゅう} ${r1.q}つ）${G.reports.length > 1 ? `<br>そのあとも ${G.reports.length - 1}{回|かい} {連絡|れんらく}した` : ''}` : 'していない'],
+    ['{連絡|れんらく}', !hadT ? '（ひつようなし）' : r1 ? `トラブルから ${minTxt(Math.max(0, Math.round(r1.sinceTrouble)))}あと${r1.incoming ? '（{相手|あいて}からの {電話|でんわ}）' : ''}<br>つたえたこと ${'●'.repeat(r1.q)}${'○'.repeat(3 - r1.q)}（3つ{中|ちゅう} ${r1.q}つ）${G.reports.length > 1 ? `<br>そのあとも ${G.reports.length - 1}{回|かい} {連絡|れんらく}した` : ''}` : 'していない'],
     ['{駅員|えきいん}さんに {相談|そうだん}', G.consulted ? 'できた' : 'していない'],
   ];
   if (r1 && r1.est && !timeout) rows.push(['おくれの よそう', `${minTxt(r1.est)} → じっさい ${minTxt(Math.ceil(late))}`]);
@@ -1026,7 +1032,8 @@ function finish(timeout) {
   else if (r1.incoming) feel = `${who}は {心配|しんぱい}して、{自分|じぶん}から {電話|でんわ}を かけました。`;
   else if (r1.sinceTrouble <= 3) feel = `すぐに {連絡|れんらく}できました。${who}は あんしんして まっていました。`;
   else feel = `{連絡|れんらく}が {少|すこ}し おそかったので、${who}は {心配|しんぱい}しました。`;
-  $('#resBars').innerHTML = `<div class="feel">${rb(feel)}</div>`;
+  const mood = !hadT ? 'happy' : !r1 ? 'worry' : r1.incoming ? 'call' : r1.sinceTrouble <= 3 && r1.q >= 2 ? 'happy' : 'wait';
+  $('#resBars').innerHTML = `<div style="display:flex;align-items:center;gap:14px"><div style="width:130px;flex:none">${contactSVG(mood)}</div><div class="feel" style="flex:1">${rb(feel)}</div></div>`;
   $('#resLesson').innerHTML = rb(hadT
     ? `トラブルは だれにでも おきます。{大切|たいせつ}なのは そのあと。<b>{早|はや}く</b>・<b>わかりやすく</b>（だれ・どこ・おくれること・どうする）つたえると、まっている {人|ひと}が あんしんできます。わからない ときは {駅員|えきいん}さんに {相談|そうだん}しよう。`
     : `{乗|の}りかえ{案内|あんない}を {読|よ}んで、{予定|よてい}どおりに {着|つ}けました。もしも のときは「{早|はや}く {連絡|れんらく}」を {思|おも}い{出|だ}そう。`);
@@ -1063,7 +1070,7 @@ function startMission() {
   const m = pickMission();
   Object.assign(G, { mission: m, delay: null, t: m.start, ride: null, lastAlight: null, troubles: [], onPlan: true, legIdx: 0,
     firstTroubleT: null, lastTroubleT: null, reportedOk: false, quality: 0, reports: [], damage: 0, consulted: false,
-    worryStep: 0, callShown: false, called: false, dozeDone: false, dozing: false, delayAnnounced: false, delayTrigger: 1e9, exitT: null, timeout: false, ff: false, result: null });
+    worryStep: 0, callShown: false, called: false, dozeDone: false, dozing: false, delayAnnounced: false, delayTrigger: 1e9, exitT: null, timeout: false, ff: false, result: null, exiting: false, gateT: null, pendingTrouble: null });
   G.plan = makePlan();
   if (m.event === 'delay') {
     const leg = G.plan.legs[G.plan.legs.length - 1];
@@ -1092,6 +1099,7 @@ function trouble(kind) {
   $('#contact').hidden = true;
   G.lastTroubleT = G.t; G.reportedOk = false; G.worryStep = 0; G.callShown = false; G.ff = false;
   const after = G.reports.length ? '<br>（{前|まえ}に {連絡|れんらく}したときと {状況|じょうきょう}が かわった）' : '';
+  if (G.dozing) { G.pendingTrouble = kind; return; }
   banner(`${KIND[kind]}！<br>このままだと {予定|よてい}に {間|ま}に{合|あ}わない。どうする？${after}`, 'warn', 7);
   SND.alert();
 }
@@ -1119,7 +1127,7 @@ function moveTo(nx, nz) {
   // 改札
   if (P.level === 'upper' && !P.onStair && ((ox >= -8) !== (nx >= -8))) {
     if (nx < -8) {
-      if (station.id === G.mission.to) { P.x = nx; P.z = nz; SND.gate(); banner(`{改札|かいさつ}を {出|で}た！`, 'info', 3); finish(false); return; }
+      if (station.id === G.mission.to) { P.x = nx; P.z = nz; if (!G.exiting) { G.exiting = true; G.gateT = G.t; G.exitT = G.t; SND.gate(); banner(`{改札|かいさつ}を {出|で}た！ とうちゃく`, 'info', 3); setTimeout(() => { if (G.exiting) finish(false); }, 2600); } return; }
       banner(station.id === G.mission.from && G.phase === 'station' ? 'ここは {出発|しゅっぱつ}の {駅|えき}。{電車|でんしゃ}に のろう' : 'ここは おりる {駅|えき}では ありません', 'info', 3); return;
     } else SND.gate();
   }
@@ -1218,7 +1226,7 @@ function update(dtReal) {
   // 困り度
   if (G.firstTroubleT != null) G.damage += (G.reportedOk ? CFG.rateByQuality[G.quality] : CFG.rateUnreported) * dtMin;
   // 相手の心配・電話
-  if (G.firstTroubleT != null && !G.reportedOk) {
+  if (G.firstTroubleT != null && !G.reportedOk && G.exitT == null) {
     const el = G.t - G.lastTroubleT;
     if (G.worryStep === 0 && el >= CFG.worryAt[0]) { G.worryStep = 1; showContact('wait', 'まだ {来|こ}ないな……'); }
     if (G.worryStep === 1 && el >= CFG.worryAt[1]) { G.worryStep = 2; showContact('worry', '{連絡|れんらく}がない。{心配|しんぱい}だな……'); }
@@ -1245,7 +1253,7 @@ function update(dtReal) {
     }
   }
   // 時間切れ
-  if (G.t > G.plan.deadline + CFG.giveUpMin) { finish(true); return; }
+  if (!G.exiting && G.t > G.plan.deadline + CFG.giveUpMin) { finish(true); return; }
 
   if (G.phase === 'station') {
     // 手前でおりた電車が出ていった
@@ -1288,7 +1296,8 @@ function update(dtReal) {
     }
     if (G.dozing && R.i !== tI && G.t >= depT(R.L, R.dir, R.k, tI) + 0.35) {
       G.dozing = false; $('#doze').hidden = true;
-      banner(`はっ！ ねてしまった……。{次|つぎ}は ${sn(LN(R.L).stations[R.i])}`, 'warn', 6);
+      banner(`はっ！ ねてしまった……。{次|つぎ}は ${sn(LN(R.L).stations[R.i])}` + (G.pendingTrouble ? `<br>${KIND[G.pendingTrouble]}！ どうする？` : ''), 'warn', 8);
+      if (G.pendingTrouble) { G.pendingTrouble = null; SND.alert(); }
     }
   }
 }
@@ -1444,7 +1453,7 @@ window.__game = {
     joy(x, y) { G.input.jx = x; G.input.jy = y; },
     teleport(x, z, level = 'lower') { Object.assign(G.P, { x, z, level, onStair: false, y: level === 'upper' ? 7 : 1 }); },
     action: doAction, board: () => { const tr = nearTrain(); if (tr) board(tr); return !!tr; }, alight: () => alight(false),
-    report(q = 4) { const items = ['name', 'where', 'late', 'plan'].map((k, i) => ({ key: k, ok: i < q, n: 10 })); report(items, false); closeOv('ovReply'); },
+    report(q = 3) { const items = ['greet', 'where', 'next'].map((k, i) => ({ key: k, ok: i < q, n: 10 })); report(items, false); closeOv('ovReply'); },
     closeAll() { [...G.modals].forEach(closeOv); },
     nearTrain, plan: () => G.plan,
   },
