@@ -125,9 +125,9 @@ rt{font-size:.5em;font-weight:400}
   }
 }
 </script>
-<!-- build: 2026-10-10b -->
+<!-- build: 2026-10-10c -->
 <div id="stage"></div>
-<div id="ver">v2026-10-10b</div>
+<div id="ver">v2026-10-10c</div>
 
 <div id="hud" hidden>
   <div id="clock" class="panel">
@@ -261,7 +261,7 @@ import * as THREE from 'three';
    設定（数値はここだけ直せば変わります）
    ========================================================= */
 const CFG = {
-  version: 'v2026-10-10b',
+  version: 'v2026-10-10c',
   timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
   ffScale: 4,            // 「はやおくり」中の倍率
   headway: 5,            // 電車の間隔（分）
@@ -283,10 +283,11 @@ const CFG = {
   delayMin: 12,          // レベル2の電車遅れ（分）
   meterMax: 60,
   lines: {
-    ao:     { name: 'あお線',   kana: 'あおせん',   color: '#2f6fd6', stations: ['moridai','kawabe','chuo','sakura','minato','umibe'] },
+    ao:     { name: 'あお線',   kana: 'あおせん',   color: '#2f6fd6', stations: ['yamate','moridai','kawabe','chuo','sakura','minato','umibe'] },
     midori: { name: 'みどり線', kana: 'みどりせん', color: '#21a05f', stations: ['higashi','chuo','hoshi','hanazono','kitamori'] },
   },
   stations: {
+    yamate:   { name: '山手',     kana: 'やまて' },
     moridai:  { name: 'もりの台', kana: 'もりのだい' },
     kawabe:   { name: 'かわべ',   kana: 'かわべ' },
     chuo:     { name: '中央',     kana: 'ちゅうおう' },
@@ -309,7 +310,7 @@ const CFG = {
   },
   levelEvent: { 1: 'doze', 2: 'delay' },   // レベル1：うとうと寝すごし　レベル2：電車の遅れ
 };
-const BASE = { ao: { '1': 390, '-1': 392 }, midori: { '1': 391, '-1': 393.5 } }; // 始発駅の発車基準（分）
+const BASE = { ao: { '1': 386.8, '-1': 392 }, midori: { '1': 391, '-1': 393.5 } }; // 始発駅の発車基準（分）
 
 /* ---------- 文字まわり ---------- */
 const $ = s => document.querySelector(s);
