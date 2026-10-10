@@ -1,0 +1,1238 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>電車でおでかけ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* 駅のサイン（紺・白・発車標の橙）をもとにした1テーマのゲーム画面 */
+:root{
+  --navy:#1b2a4a; --navy2:#2c3f66; --paper:#ffffff; --ink:#1b2a4a; --muted:#5b6b88;
+  --led:#ffb020; --ao:#2f6fd6; --midori:#21a05f; --warn:#d8432f; --ok:#1f9d55; --sky:#a9cdea;
+  --font:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--sky);color:var(--ink);font-family:var(--font);
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+*{box-sizing:border-box}
+button{font-family:var(--font);touch-action:manipulation;cursor:pointer}
+rt{font-size:.5em;font-weight:400}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block;width:100%;height:100%}
+#ver{position:fixed;right:6px;bottom:calc(4px + env(safe-area-inset-bottom,0px));font-size:11px;color:#22324f;opacity:.6;z-index:60;pointer-events:none}
+
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+#hud>*{pointer-events:auto}
+#hud>#clock,#hud>#banner,#hud>#led{pointer-events:none}
+.panel{background:rgba(255,255,255,.94);border-radius:14px;box-shadow:0 3px 12px rgba(20,30,60,.25)}
+#clock{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:10px 14px;width:270px;pointer-events:none}
+#tNow{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+#tGoal{font-size:15px;margin-top:6px;line-height:1.7}
+.meter{display:flex;align-items:center;gap:8px;margin-top:8px}
+.mlabel{font-size:14px;font-weight:700;white-space:nowrap}
+.mbar{flex:1;height:16px;background:#e3e8f1;border-radius:8px;overflow:hidden}
+.mbar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s,background .3s}
+#mVal{font-size:20px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right}
+#mRate{font-size:13px;margin-top:4px;line-height:1.7;color:var(--muted)}
+#mRate.bad{color:var(--warn);font-weight:700}
+#topright{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:8px}
+.round{width:52px;height:52px;border-radius:50%;border:none;background:#fff;color:var(--navy);font-size:26px;font-weight:700;box-shadow:0 3px 10px rgba(20,30,60,.3)}
+#banner{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(560px,calc(100vw - 600px));min-width:260px;
+  padding:12px 18px;font-size:18px;line-height:1.8;font-weight:700;text-align:center;pointer-events:none}
+#banner.warn{background:#fff3f0;border:3px solid var(--warn)}
+#banner.info{background:#fff;border:3px solid var(--navy2)}
+#banner.call{background:#fffbe8;border:3px solid var(--led)}
+@media (max-width:900px){#banner{max-width:calc(100vw - 24px);top:auto;bottom:calc(220px + env(safe-area-inset-bottom,0px))}}
+#led{position:absolute;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));width:min(720px,calc(100vw - 32px));background:#111;border-radius:12px;padding:10px 16px;color:var(--led);pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#led .big{font-size:30px;font-weight:700;text-align:center;line-height:1.6}
+#led .sub{font-size:15px;color:#ffd9a0;text-align:center}
+.route{display:flex;align-items:flex-start;justify-content:space-between;margin-top:8px;position:relative;padding-top:6px}
+.route::before{content:"";position:absolute;left:4%;right:4%;top:14px;height:4px;background:var(--lc,#888);border-radius:2px}
+.route .st{flex:1;text-align:center;font-size:13px;color:#ddd;position:relative;line-height:1.5}
+.route .st .dot{width:16px;height:16px;border-radius:50%;background:#333;border:3px solid var(--lc,#888);margin:0 auto 4px}
+.route .st.now .dot{background:var(--led);border-color:var(--led);box-shadow:0 0 10px var(--led)}
+.route .st.now{color:var(--led);font-weight:700}
+.route .st.next .dot{background:#fff}
+#joy{position:absolute;left:calc(24px + env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.35);border:3px solid rgba(255,255,255,.8);touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#rbtns{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+#rbtns .row{display:flex;gap:10px}
+.sbtn{min-width:76px;height:64px;border:none;border-radius:14px;background:#fff;color:var(--navy);font-size:15px;font-weight:700;box-shadow:0 3px 10px rgba(20,30,60,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 8px;line-height:1.3}
+.sbtn svg{width:26px;height:26px}
+.sbtn.on{background:var(--led)}
+.sbtn.ring{animation:ring .5s infinite alternate;background:#ffe9b0}
+@keyframes ring{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+#btnAct{min-width:180px;height:84px;border:none;border-radius:18px;font-size:28px;font-weight:700;color:#fff;background:var(--navy);box-shadow:0 4px 14px rgba(20,30,60,.4)}
+#btnAct.board{background:var(--ok)}
+#btnAct.alight{background:var(--warn)}
+#btnAct.ask{background:var(--navy2)}
+#doze{position:fixed;inset:0;background:rgba(8,10,25,.88);z-index:20;display:flex;align-items:center;justify-content:center;color:#cfd8ff;font-size:40px;font-weight:700;pointer-events:none}
+#doze[hidden]{display:none}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:40;background:rgba(15,24,45,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.ov[hidden]{display:none}
+.card{background:var(--paper);border-radius:20px;max-width:880px;width:100%;max-height:calc(100% - 8px);overflow:auto;-webkit-overflow-scrolling:touch;box-shadow:0 10px 40px rgba(0,0,0,.35);padding:22px 26px;line-height:1.8}
+.card h1{font-size:38px;margin:0;letter-spacing:.04em;text-wrap:balance}
+.card h2{font-size:24px;margin:0 0 10px;text-wrap:balance}
+.card h3{font-size:18px;margin:14px 0 6px;color:var(--navy2)}
+.big-btn{min-height:64px;padding:8px 28px;border:none;border-radius:16px;background:var(--navy);color:#fff;font-size:24px;font-weight:700}
+.big-btn.go{background:var(--ok)}
+.sub-btn{min-height:52px;padding:6px 18px;border:2px solid var(--navy2);border-radius:14px;background:#fff;color:var(--navy);font-size:18px;font-weight:700}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.titlebar{display:flex;align-items:center;gap:16px;border-bottom:4px solid var(--navy);padding-bottom:10px;margin-bottom:14px}
+.titlebar .lines{display:flex;gap:6px}
+.titlebar .lines i{width:14px;height:46px;border-radius:4px;display:block}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice{border:3px solid #cdd6e6;border-radius:16px;background:#fff;padding:12px;text-align:left;font-size:18px;color:var(--ink);min-height:72px;line-height:1.7}
+.choice b{font-size:21px;display:block}
+.choice.sel{border-color:var(--navy);background:#eef3ff;box-shadow:inset 0 0 0 2px var(--navy)}
+.howto{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.how{display:flex;gap:10px;align-items:flex-start;background:#f3f6fb;border-radius:12px;padding:10px;font-size:15px;line-height:1.75}
+.how svg{flex:0 0 52px;width:52px;height:52px}
+@media (max-width:760px){.howto{grid-template-columns:1fr}.choose{grid-template-columns:1fr}}
+.plan .leg{display:grid;grid-template-columns:72px 18px 1fr;gap:0 10px;align-items:stretch}
+.plan .tm{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;padding-top:2px}
+.plan .bar{border-radius:9px;margin:6px 0}
+.plan .node{width:18px;height:18px;border-radius:50%;border:4px solid var(--navy);background:#fff;margin-top:8px}
+.plan .stn{font-size:22px;font-weight:700}
+.plan .ride{font-size:17px;padding:8px 0 14px;color:var(--ink)}
+.chip{display:inline-block;padding:0 10px;border-radius:8px;color:#fff;font-weight:700;margin-right:6px}
+.trk{display:inline-block;padding:0 10px;border-radius:8px;background:var(--navy);color:#fff;font-weight:700}
+.deadline{margin-top:10px;background:#fff6df;border:2px solid var(--led);border-radius:12px;padding:8px 14px;font-size:19px;font-weight:700}
+.phone{max-width:640px;border:8px solid #222;border-radius:30px}
+.phone .who{font-size:20px;font-weight:700;border-bottom:2px solid #e4e8f0;padding-bottom:8px}
+.phone .ask{background:#eef3ff;border-radius:12px;padding:8px 12px;margin:10px 0;font-size:17px}
+.prow{margin:10px 0}
+.prow .lab{font-size:15px;font-weight:700;color:var(--navy2)}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.opt{min-height:48px;padding:4px 14px;border:2px solid #cdd6e6;border-radius:12px;background:#fff;font-size:17px;color:var(--ink);line-height:1.8}
+.opt.sel{border-color:var(--navy);background:#dfe8ff;font-weight:700}
+.opt.none{color:var(--muted)}
+.preview{background:#f7f7f2;border-left:6px solid var(--ok);padding:8px 12px;border-radius:8px;font-size:18px;min-height:52px}
+.staffq{display:flex;gap:14px;align-items:flex-start}
+.staffq svg{flex:0 0 70px;width:70px;height:70px}
+.say{background:#eef3ff;border-radius:14px;padding:10px 14px;font-size:19px;flex:1}
+.reslist{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:18px}
+.reslist dt{font-weight:700;color:var(--navy2)}
+.reslist dd{margin:0;font-variant-numeric:tabular-nums}
+.bars{display:grid;gap:10px;margin-top:8px}
+.brow{display:grid;grid-template-columns:200px 1fr 64px;align-items:center;gap:10px;font-size:16px}
+.btrack{height:26px;background:#eceff5;border-radius:8px;overflow:hidden}
+.btrack i{display:block;height:100%;border-radius:8px}
+.brow b{font-size:20px;text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.brow{grid-template-columns:1fr 54px}.brow .btrack{grid-column:1/-1;order:3}}
+.lesson{margin-top:14px;background:#effaf3;border:2px solid var(--ok);border-radius:12px;padding:10px 14px;font-size:18px}
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:2px;font-size:14px;font-weight:700;color:var(--navy2)}
+.field input{font-size:18px;padding:8px 10px;border:2px solid #cdd6e6;border-radius:10px;font-family:var(--font);width:100%;-webkit-user-select:text;user-select:text}
+.field .two{display:flex;gap:6px}
+.note{font-size:14px;color:var(--muted)}
+:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.sbtn.ring{animation:none}.mbar i{transition:none}}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+<!-- build: 2026-10-10 -->
+<div id="stage"></div>
+<div id="ver">v2026-10-10</div>
+
+<div id="hud" hidden>
+  <div id="clock" class="panel">
+    <div id="tNow">7:41</div>
+    <div id="tGoal"></div>
+    <div class="meter"><div class="mlabel"><ruby>困<rt>こま</rt></ruby>り<ruby>度<rt>ど</rt></ruby></div><div class="mbar"><i id="mFill"></i></div><b id="mVal">0</b></div>
+    <div id="mRate"></div>
+  </div>
+  <div id="topright"><button id="btnHelp" class="round" aria-label="あそびかた">？</button></div>
+  <div id="banner" hidden></div>
+  <div id="led" hidden></div>
+  <div id="joy"><div id="knob"></div></div>
+  <div id="rbtns">
+    <button id="btnAct" hidden></button>
+    <div class="row">
+      <button id="btnFF" class="sbtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>はやおくり</button>
+      <button id="btnPlan" class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span><ruby>案内<rt>あんない</rt></ruby></span></button>
+      <button id="btnPhone" class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg><span><ruby>連絡<rt>れんらく</rt></ruby></span></button>
+    </div>
+  </div>
+</div>
+<div id="doze" hidden>うとうと…… zzz</div>
+
+<!-- スタート（説明）画面 -->
+<div id="ovStart" class="ov">
+  <div class="card scroll">
+    <div class="titlebar">
+      <div class="lines"><i style="background:var(--ao)"></i><i style="background:var(--midori)"></i></div>
+      <div><h1><ruby>電車<rt>でんしゃ</rt></ruby>でおでかけ</h1>
+      <div style="font-size:17px"><ruby>乗<rt>の</rt></ruby>りかえ<ruby>案内<rt>あんない</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、<ruby>駅<rt>えき</rt></ruby>を<ruby>進<rt>すす</rt></ruby>もう。こまったら、すぐ<ruby>連絡<rt>れんらく</rt></ruby>・<ruby>相談<rt>そうだん</rt></ruby>。</div></div>
+    </div>
+    <h3>どこへ<ruby>行<rt>い</rt></ruby>く？</h3>
+    <div class="choose" id="chScene"></div>
+    <h3>レベル</h3>
+    <div class="choose" id="chLevel"></div>
+    <h3>あそびかた</h3>
+    <div class="howto" id="howto1"></div>
+    <div class="btnrow">
+      <button class="sub-btn" id="btnSettings"><ruby>駅<rt>えき</rt></ruby>の<ruby>名前<rt>なまえ</rt></ruby>・せってい</button>
+      <button class="big-btn go" id="btnStart">はじめる</button>
+    </div>
+  </div>
+</div>
+
+<div id="ovHelp" class="ov" hidden>
+  <div class="card scroll">
+    <h2>あそびかた</h2>
+    <div class="howto" id="howto2"></div>
+    <div class="btnrow"><button class="big-btn" id="btnHelpClose">ゲームにもどる</button></div>
+  </div>
+</div>
+
+<div id="ovSettings" class="ov" hidden>
+  <div class="card scroll">
+    <h2><ruby>駅<rt>えき</rt></ruby>の<ruby>名前<rt>なまえ</rt></ruby>・せってい</h2>
+    <p class="note">じっさいの<ruby>駅<rt>えき</rt></ruby><ruby>名<rt>めい</rt></ruby>や、じぶんで<ruby>考<rt>かんが</rt></ruby>えた<ruby>名前<rt>なまえ</rt></ruby>を<ruby>入<rt>い</rt></ruby>れられます。「よみ」はふりがなになります。<ruby>画面<rt>がめん</rt></ruby>を<ruby>開<rt>ひら</rt></ruby>きなおすと、もとにもどります。</p>
+    <div id="setBody"></div>
+    <div class="btnrow">
+      <button class="sub-btn" id="btnSetReset">もとにもどす</button>
+      <button class="big-btn" id="btnSetClose">けってい</button>
+    </div>
+  </div>
+</div>
+
+<div id="ovPlan" class="ov" hidden>
+  <div class="card scroll plan" style="max-width:640px">
+    <h2 id="planTitle"></h2>
+    <div id="planStory" style="font-size:17px;margin-bottom:10px"></div>
+    <div id="planBody"></div>
+    <div class="btnrow"><button class="big-btn go" id="btnPlanClose">しゅっぱつ</button></div>
+  </div>
+</div>
+
+<div id="ovPhone" class="ov" hidden>
+  <div class="card scroll phone">
+    <div class="who" id="phWho"></div>
+    <div class="ask" id="phAsk" hidden></div>
+    <div id="phRows"></div>
+    <div class="prow"><div class="lab">つたえる<ruby>文<rt>ぶん</rt></ruby></div><div class="preview" id="phPrev"></div></div>
+    <div class="btnrow">
+      <button class="sub-btn" id="btnPhCancel">やめる</button>
+      <button class="big-btn go" id="btnPhSend">つたえる</button>
+    </div>
+  </div>
+</div>
+
+<div id="ovReply" class="ov" hidden>
+  <div class="card" style="max-width:600px">
+    <div class="who" id="rpWho" style="font-size:20px;font-weight:700"></div>
+    <div class="say" id="rpText" style="margin-top:10px"></div>
+    <div class="btnrow"><button class="big-btn" id="btnRpClose">わかった</button></div>
+  </div>
+</div>
+
+<div id="ovCall" class="ov" hidden>
+  <div class="card" style="max-width:520px;text-align:center">
+    <div style="font-size:22px;font-weight:700" id="callWho"></div>
+    <div style="font-size:18px;margin:8px 0">から <ruby>電話<rt>でんわ</rt></ruby>が かかってきた！</div>
+    <div class="btnrow"><button class="big-btn go" id="btnCallAns">でる</button></div>
+  </div>
+</div>
+
+<div id="ovStaff" class="ov" hidden>
+  <div class="card" style="max-width:640px">
+    <div class="staffq">
+      <svg viewBox="0 0 70 70"><circle cx="35" cy="26" r="13" fill="#f2cfa8"/><rect x="20" y="9" width="30" height="9" rx="3" fill="#1b2a4a"/><rect x="18" y="16" width="34" height="4" fill="#1b2a4a"/><path d="M14 68c0-16 9-26 21-26s21 10 21 26z" fill="#1b2a4a"/><circle cx="35" cy="54" r="3" fill="#ffb020"/></svg>
+      <div class="say" id="stSay"></div>
+    </div>
+    <div class="btnrow" id="stOpts"></div>
+  </div>
+</div>
+
+<div id="ovResult" class="ov" hidden>
+  <div class="card scroll" style="max-width:760px">
+    <h2 id="resTitle"></h2>
+    <dl class="reslist" id="resList"></dl>
+    <h3><ruby>困<rt>こま</rt></ruby>り<ruby>度<rt>ど</rt></ruby>くらべ</h3>
+    <div class="bars" id="resBars"></div>
+    <div class="lesson" id="resLesson"></div>
+    <div class="btnrow">
+      <button class="sub-btn" id="btnResMenu">メニューへ</button>
+      <button class="big-btn go" id="btnResAgain">もう<ruby>一度<rt>いちど</rt></ruby></button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* =========================================================
+   設定（数値はここだけ直せば変わります）
+   ========================================================= */
+const CFG = {
+  version: 'v2026-10-10',
+  timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
+  ffScale: 4,            // 「はやおくり」中の倍率
+  headway: 5,            // 電車の間隔（分）
+  rideMin: 2,            // 駅と駅のあいだ（分）
+  dwellMin: 1.2,         // ドアが開いている時間（分）
+  approachMin: 0.45, leaveMin: 0.45,   // 電車が入ってくる・出ていく演出（分）
+  planWalkMin: 2,        // 案内で見こむ、改札からホームまでの時間（分）
+  transferMin: 3,        // 案内で見こむ、乗りかえ時間（分）
+  exitMin: 3,            // 到着から「改札を出る」しめきりまでの余裕（分）
+  walkSpeed: 6.5,
+  // 困り度（1分あたりの増え方）
+  rateUnreported: 3.0,                  // トラブル中で、まだ伝えていない
+  rateByQuality: [3.0, 1.6, 1.0, 0.6, 0.3], // 伝えた内容の数（0〜4つ）ごと
+  latePerMin: 1.0,       // 遅れた1分あたり
+  noContactPenalty: 20,  // 一度も連絡しないまま遅れて着いた
+  worryAt: [3, 8],       // 相手が心配しはじめる（トラブルから何分）
+  callAfterMin: 12,      // 相手から電話がかかってくる
+  giveUpMin: 45,         // しめきり後この分数で時間切れ
+  delayMin: 12,          // レベル2の電車遅れ（分）
+  meterMax: 60,
+  lines: {
+    ao:     { name: 'あお線',   kana: 'あおせん',   color: '#2f6fd6', stations: ['moridai','kawabe','chuo','sakura','minato','umibe'] },
+    midori: { name: 'みどり線', kana: 'みどりせん', color: '#21a05f', stations: ['higashi','chuo','hoshi','hanazono','kitamori'] },
+  },
+  stations: {
+    moridai:  { name: 'もりの台', kana: 'もりのだい' },
+    kawabe:   { name: 'かわべ',   kana: 'かわべ' },
+    chuo:     { name: '中央',     kana: 'ちゅうおう' },
+    sakura:   { name: 'さくら町', kana: 'さくらまち' },
+    minato:   { name: 'みなと',   kana: 'みなと' },
+    umibe:    { name: 'うみべ',   kana: 'うみべ' },
+    higashi:  { name: 'ひがし山', kana: 'ひがしやま' },
+    hoshi:    { name: 'ほしの丘', kana: 'ほしのおか' },
+    hanazono: { name: '花園',     kana: 'はなぞの' },
+    kitamori: { name: '北の森',   kana: 'きたのもり' },
+  },
+  people: {
+    school: '○○中学校', player: '',
+    teacher: { name: '山田先生', kana: 'やまだせんせい' },
+    boss:    { name: '佐藤さん', kana: 'さとうさん' },
+  },
+  scenes: {
+    school: { missions: { 1: { from: 'moridai', to: 'sakura', start: 7*60+41 }, 2: { from: 'moridai', to: 'hoshi', start: 7*60+41 } } },
+    work:   { missions: { 1: { from: 'moridai', to: 'minato', start: 8*60+16 }, 2: { from: 'moridai', to: 'hanazono', start: 8*60+16 } } },
+  },
+  levelEvent: { 1: 'doze', 2: 'delay' },   // レベル1：うとうと寝すごし　レベル2：電車の遅れ
+};
+const BASE = { ao: { '1': 390, '-1': 392 }, midori: { '1': 391, '-1': 393.5 } }; // 始発駅の発車基準（分）
+
+/* ---------- 文字まわり ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"{}|]/g, '');
+const rb = s => String(s).replace(/\{([^|{}]+)\|([^{}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
+const hasKanji = s => /[㐀-鿿々]/.test(s);
+const fur = (name, kana) => hasKanji(name) && kana ? `{${esc(name)}|${esc(kana)}}` : esc(name);
+let SET;
+function resetSettings() { SET = JSON.parse(JSON.stringify({ stations: CFG.stations, lines: { ao: { name: CFG.lines.ao.name, kana: CFG.lines.ao.kana }, midori: { name: CFG.lines.midori.name, kana: CFG.lines.midori.kana } }, people: CFG.people })); }
+resetSettings();
+const sn = id => fur(SET.stations[id].name, SET.stations[id].kana);
+const ln = L => fur(SET.lines[L].name, SET.lines[L].kana);
+const fm = t => { const m = Math.floor(t + 1e-6); return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
+const fun = n => [1,3,4,6,8,10].includes(n % 10) || n % 10 === 0 ? 'ぷん' : 'ふん';
+const minTxt = n => `${n}{分|${fun(n)}}`;
+
+/* ---------- 路線・時刻表 ---------- */
+const LINE_ORDER = ['ao', 'midori'];
+const LN = L => CFG.lines[L];
+const idxOf = (s, L) => LN(L).stations.indexOf(s);
+const linesAt = s => LINE_ORDER.filter(L => idxOf(s, L) >= 0);
+const startIdx = (L, dir) => dir > 0 ? 0 : LN(L).stations.length - 1;
+const endIdx = (L, dir) => dir > 0 ? LN(L).stations.length - 1 : 0;
+const TRANSFER = LN('ao').stations.find(s => idxOf(s, 'midori') >= 0);
+const SEG = () => CFG.rideMin + CFG.dwellMin;
+function delayOf(L, dir, k) { const d = G.delay; return (d && d.L === L && d.dir === dir && k >= d.k) ? d.min : 0; }
+function arrT(L, dir, k, i, noDelay) { return BASE[L][dir] + k * CFG.headway + (noDelay ? 0 : delayOf(L, dir, k)) + Math.abs(i - startIdx(L, dir)) * SEG(); }
+const depT = (L, dir, k, i, nd) => arrT(L, dir, k, i, nd) + CFG.dwellMin;
+const firstK = (L, dir, i, tE) => Math.max(0, Math.ceil((tE - arrT(L, dir, 0, i, true)) / CFG.headway - 1e-9));
+const trackNum = (s, L, dir) => linesAt(s).indexOf(L) * 2 + (dir < 0 ? 1 : 2);
+const termName = (L, dir) => LN(L).stations[endIdx(L, dir)];
+const destLine = () => linesAt(G.mission.to)[0];
+function correctBoard(s) {
+  const to = G.mission.to; if (s === to) return null;
+  const tL = destLine();
+  if (idxOf(s, tL) >= 0) return { line: tL, dir: Math.sign(idxOf(to, tL) - idxOf(s, tL)) };
+  const L = linesAt(s)[0];
+  return { line: L, dir: Math.sign(idxOf(TRANSFER, L) - idxOf(s, L)) };
+}
+const targetIdx = (L) => L === destLine() ? idxOf(G.mission.to, L) : idxOf(TRANSFER, L);
+
+/* ---------- 状態 ---------- */
+const G = {
+  phase: 'title', t: 0, frames: 0, elapsed: 0, ff: false,
+  sceneKey: 'school', level: 1, mission: null, plan: null,
+  P: { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2 },
+  cam: { yaw: 0, pitch: 0.36, dist: 7.5 },
+  ride: null, lastAlight: null, troubles: [], onPlan: true, legIdx: 0,
+  firstTroubleT: null, lastTroubleT: null, reportedOk: false, quality: 0, reports: [], damage: 0,
+  consulted: false, worryStep: 0, callShown: false, called: false,
+  dozeDone: false, dozing: false, delay: null, delayAnnounced: false, delayTrigger: 1e9,
+  exitT: null, timeout: false, input: { jx: 0, jy: 0 }, guide: null, modals: new Set(),
+};
+const contact = () => G.sceneKey === 'school' ? SET.people.teacher : SET.people.boss;
+const contactMk = () => fur(contact().name, contact().kana);
+const placeMk = () => G.sceneKey === 'school' ? '{学校|がっこう}' : '{職場|しょくば}{体験|たいけん}の{店|みせ}';
+
+/* =========================================================
+   Three.js
+   ========================================================= */
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+$('#stage').appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#a9cdea');
+scene.fog = new THREE.Fog('#a9cdea', 70, 230);
+const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 600);
+scene.add(new THREE.HemisphereLight('#ffffff', '#8a8f9c', 1.6));
+const sun = new THREE.DirectionalLight('#ffffff', 1.4); sun.position.set(30, 60, 20); scene.add(sun);
+
+const MATS = {};
+const M = c => MATS[c] || (MATS[c] = new THREE.MeshLambertMaterial({ color: c }));
+function box(w, h, d, mat, x, y, z, parent) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), typeof mat === 'string' ? M(mat) : mat);
+  m.position.set(x, y, z); if (parent) parent.add(m); return m;
+}
+const FONT = '"BIZ UDPGothic","Hiragino Sans",sans-serif';
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); draw(g, w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  t.userData = { canvas: c, draw }; return t;
+}
+function redraw(t) { const c = t.userData.canvas; const g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); t.userData.draw(g, c.width, c.height); t.needsUpdate = true; }
+function plane(tex, w, h, parent, x, y, z, ry = 0) {
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true }); mat.userData.temp = true;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, y, z); m.rotation.y = ry; if (parent) parent.add(m); return m;
+}
+function nameKana(g, name, kana, x, y, size, color = '#fff', kcolor) {
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = color;
+  g.font = `700 ${size}px ${FONT}`; fitText(g, name, x, y, size * 6);
+  if (kana && kana !== name) { g.fillStyle = kcolor || color; g.font = `400 ${Math.round(size * 0.42)}px ${FONT}`; fitText(g, kana, x, y + size * 0.55, size * 6); }
+}
+function fitText(g, s, x, y, maxW) { const w = g.measureText(s).width; if (w > maxW) { g.save(); g.translate(x, y); g.scale(maxW / w, 1); g.fillText(s, 0, 0); g.restore(); } else g.fillText(s, x, y); }
+function disposeGroup(g) {
+  g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.userData.temp) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
+}
+function makePerson(color, opt = {}) {
+  const g = new THREE.Group();
+  box(0.7, 0.9, 0.45, color, 0, 0.95, 0, g);
+  box(0.3, 0.55, 0.3, opt.leg || '#333a48', -0.18, 0.28, 0, g); box(0.3, 0.55, 0.3, opt.leg || '#333a48', 0.18, 0.28, 0, g);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 10), M('#f2cfa8')); head.position.y = 1.68; g.add(head);
+  if (opt.cap) { box(0.62, 0.16, 0.62, '#1b2a4a', 0, 1.92, 0, g); box(0.62, 0.05, 0.3, '#1b2a4a', 0, 1.85, 0.3, g); box(0.2, 0.08, 0.05, '#ffb020', 0, 1.93, 0.32, g); }
+  else box(0.6, 0.18, 0.58, opt.hair || '#2b2420', 0, 1.88, -0.03, g);
+  if (opt.bag) box(0.55, 0.6, 0.25, opt.bag, 0, 1.05, -0.33, g);
+  return g;
+}
+
+/* プレイヤー */
+const player = makePerson('#f07a2a', { bag: '#2c3f66' }); scene.add(player);
+
+/* 案内の矢印 */
+const guideArrow = new THREE.Group();
+{ const cone = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.4, 16), M('#ffb020')); cone.rotation.x = Math.PI; guideArrow.add(cone); }
+guideArrow.visible = false; scene.add(guideArrow);
+const guideArrow2 = guideArrow.clone(); guideArrow2.visible = false; scene.add(guideArrow2);
+
+/* ---------- 駅をつくる ---------- */
+let station = null;
+const winTex = canvasTex(128, 256, (g, w, h) => { g.fillStyle = '#c9ccd3'; g.fillRect(0, 0, w, h); g.fillStyle = '#5d7393'; for (let y = 10; y < h; y += 30) for (let x = 10; x < w; x += 30) g.fillRect(x, y, 18, 18); });
+const winMat = new THREE.MeshLambertMaterial({ map: winTex });
+
+function trackSignTex(L, dir, num, s, arrowRight) {
+  const term = termName(L, dir); const col = LN(L).color;
+  return canvasTex(768, 256, (g, w, h) => {
+    g.fillStyle = '#1b2a4a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(110, 128, 82, 0, 7); g.fill();
+    g.fillStyle = '#1b2a4a'; g.font = `700 120px ${FONT}`; g.textAlign = 'center'; g.fillText(num, 110, 170);
+    g.fillStyle = col; g.fillRect(212, 36, 150, 54);
+    g.fillStyle = '#fff'; g.font = `700 34px ${FONT}`; fitText(g, SET.lines[L].name, 287, 76, 140);
+    nameKana(g, SET.stations[term].name + ' 方面', SET.stations[term].kana + ' ほうめん', 470, 170, 70);
+    g.font = `700 90px ${FONT}`; g.fillStyle = '#ffb020'; g.fillText(arrowRight ? '→' : '←', arrowRight ? 700 : 700, 160);
+  });
+}
+function nameBoardTex(s, L, rightIsPlus) {
+  const i = idxOf(s, L), arr = LN(L).stations; const prev = arr[i - 1], next = arr[i + 1];
+  return canvasTex(1024, 380, (g, w, h) => {
+    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+    g.fillStyle = LN(L).color; g.fillRect(0, 220, w, 22);
+    nameKana(g, SET.stations[s].name, SET.stations[s].kana, w / 2, 150, 120, '#1b2a4a');
+    const side = (id, right) => { if (!id) return; g.textAlign = right ? 'right' : 'left'; g.fillStyle = '#1b2a4a'; g.font = `700 46px ${FONT}`; const x = right ? w - 30 : 30; g.fillText((right ? '' : '← ') + SET.stations[id].name + (right ? ' →' : ''), x, 310); g.font = `400 24px ${FONT}`; g.fillText(SET.stations[id].kana, x + (right ? -50 : 50), 350); };
+    side(rightIsPlus ? next : prev, true); side(rightIsPlus ? prev : next, false);
+    g.textAlign = 'left'; g.fillStyle = LN(L).color; g.fillRect(24, 22, 170, 52); g.fillStyle = '#fff'; g.font = `700 32px ${FONT}`; fitText(g, SET.lines[L].name, 34, 60, 150);
+  });
+}
+function depBoardTex(s, L) {
+  return canvasTex(1024, 520, (g, w, h) => {
+    g.fillStyle = '#1b2a4a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = LN(L).color; g.fillRect(0, 0, w, 70);
+    g.fillStyle = '#fff'; g.font = `700 44px ${FONT}`; g.textAlign = 'left'; g.fillText(SET.lines[L].name + '　のりば ↓', 24, 52);
+    g.fillStyle = '#111'; g.fillRect(16, 84, w - 32, h - 100);
+    let y = 150;
+    for (const dir of [-1, 1]) {
+      const i = idxOf(s, L); if (i === endIdx(L, dir)) continue;
+      const num = trackNum(s, L, dir), term = termName(L, dir);
+      const kc = Math.floor((G.t - arrT(L, dir, 0, i, true)) / CFG.headway) - 3;
+      let n = 0;
+      for (let k = Math.max(0, kc); k < kc + 10 && n < 2; k++) {
+        if (depT(L, dir, k, i) < G.t) continue;
+        const sched = depT(L, dir, k, i, true), late = delayOf(L, dir, k) > 0 && G.delayAnnounced;
+        g.textAlign = 'left'; g.fillStyle = '#ffb020'; g.font = `700 50px ${FONT}`;
+        g.fillText(fm(sched), 40, y);
+        g.fillText(SET.stations[term].name + ' ゆき', 200, y);
+        g.font = `400 22px ${FONT}`; g.fillText(SET.stations[term].kana, 205, y + 30);
+        g.font = `700 44px ${FONT}`; g.textAlign = 'right'; g.fillStyle = late ? '#ff5a45' : '#7cf08a';
+        g.fillText(late ? `${G.delay.min}分おくれ` : `${num}番線`, w - 40, y);
+        y += 92; n++;
+      }
+    }
+  });
+}
+function signTex(lines, bg = '#1b2a4a') {
+  return canvasTex(768, 200, (g, w, h) => {
+    g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    const n = lines.length; lines.forEach((l, i) => nameKana(g, l[0], l[1], w / 2, (h / n) * i + h / n * 0.62, n > 1 ? 54 : 84));
+  });
+}
+
+function makeTrain(L, dir, pside) {
+  const g = new THREE.Group(); const lm = M(LN(L).color);
+  const doors = [], lights = [];
+  const term = termName(L, dir);
+  const ledTex = canvasTex(512, 96, (c, w, h) => { c.fillStyle = '#111'; c.fillRect(0, 0, w, h); c.fillStyle = '#ffb020'; c.textAlign = 'center'; c.font = `700 46px ${FONT}`; fitText(c, SET.stations[term].name + ' ゆき', w / 2, 56, w - 20); c.font = `400 20px ${FONT}`; c.fillText(SET.stations[term].kana, w / 2, 86); });
+  for (const cz of [-20, 0, 20]) {
+    box(3, 3.2, 19.4, '#eef0f3', 0, 2.6, cz, g);
+    box(3.04, 0.35, 19.4, lm, 0, 1.75, cz, g);
+    box(3.02, 0.9, 19, '#2d3b52', 0, 3.1, cz, g);
+    box(2.6, 0.6, 18, '#2a2d33', 0, 0.6, cz, g);
+    for (const dz of [-6, 0, 6]) {
+      doors.push(box(0.08, 2.3, 1.5, '#b9bec8', pside * 1.55, 2.25, cz + dz, g));
+      const l = box(0.06, 2.3, 1.5, '#ffe7a3', pside * 1.53, 2.25, cz + dz, g); l.visible = false; lights.push(l);
+      box(0.08, 2.3, 1.5, '#b9bec8', -pside * 1.55, 2.25, cz + dz, g);
+    }
+    plane(ledTex, 2.4, 0.45, g, pside * 1.58, 3.95, cz - 3, pside > 0 ? Math.PI / 2 : -Math.PI / 2);
+  }
+  g.userData = { doors, lights, open: false };
+  return g;
+}
+function setDoors(tr, open) { if (tr.userData.open === open) return; tr.userData.open = open; tr.userData.doors.forEach(d => d.visible = !open); tr.userData.lights.forEach(d => d.visible = open); }
+
+function buildStation(sId) {
+  if (station) { scene.remove(station.group); disposeGroup(station.group); }
+  const g = new THREE.Group(); scene.add(g);
+  const st = { id: sId, group: g, lines: [], tracks: [], staff: [], boards: [], upper: [], lower: [], stairs: [] };
+  const ls = linesAt(sId);
+  // 地面とまわりの町
+  const ground = box(400, 0.2, 400, '#9aa58e', 0, -0.15, 0, g);
+  const xmax = (ls.length - 1) * 20 + 10;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 36; i++) {
+    const side = i % 2 ? 1 : -1; const x = side < 0 ? -30 - rnd() * 50 : xmax + 20 + rnd() * 50;
+    const h = 6 + rnd() * 22, w = 8 + rnd() * 8; const z = -160 + (i / 36) * 320 + rnd() * 6;
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), winMat); b.position.set(x, h / 2, z); g.add(b);
+  }
+  ls.forEach((L, o) => {
+    const cx = o * 20, idx = idxOf(sId, L);
+    st.lines.push({ L, cx, idx });
+    box(6, 1, 90, '#cfcabe', cx, 0.5, 0, g);
+    box(0.35, 0.02, 90, '#f2c21a', cx - 2.35, 1.01, 0, g); box(0.35, 0.02, 90, '#f2c21a', cx + 2.35, 1.01, 0, g);
+    // 屋根と柱
+    for (const [z0, z1] of [[-45, -6], [6, 45]]) { box(7, 0.25, z1 - z0, '#dfe3ea', cx, 5.9, (z0 + z1) / 2, g); for (let z = z0 + 4; z < z1; z += 10) box(0.3, 4.9, 0.3, '#8c95a6', cx, 3.45, z, g); }
+    for (const dir of [-1, 1]) {
+      const x = cx + dir * 5; const num = trackNum(sId, L, dir);
+      box(3.4, 0.25, 400, '#7d766d', x, 0.05, 0, g);
+      box(0.15, 0.2, 400, '#5a5f66', x - 0.75, 0.25, 0, g); box(0.15, 0.2, 400, '#5a5f66', x + 0.75, 0.25, 0, g);
+      const pside = dir > 0 ? -1 : 1;
+      const train = makeTrain(L, dir, pside); train.position.x = x; train.visible = false; g.add(train);
+      st.tracks.push({ L, dir, x, cx, num, idx, train, cur: null });
+      // 床の番線数字
+      const nt = canvasTex(256, 256, (c, w, h) => { c.fillStyle = '#fff'; c.font = `700 200px ${FONT}`; c.textAlign = 'center'; c.fillText(num, w / 2, 200); });
+      for (const z of [24, -24]) { const p = plane(nt, 1.6, 1.6, g, cx + dir * 1.6, 1.03, z); p.rotation.x = -Math.PI / 2; }
+      // つり下げの番線案内（階段をおりる人むけ・反対むき）
+      plane(trackSignTex(L, dir, num, sId, dir < 0), 3.2, 1.07, g, cx + dir * 1.6, 4.6, 21, Math.PI);
+      plane(trackSignTex(L, dir, num, sId, dir > 0), 3.2, 1.07, g, cx + dir * 1.6, 4.6, -16, 0);
+    }
+    // 駅名標
+    for (const f of [1, -1]) plane(nameBoardTex(sId, L, f < 0), 4.8, 1.8, g, cx + f * 0.06, 2.4, 34, f > 0 ? Math.PI / 2 : -Math.PI / 2);
+    for (const f of [1, -1]) box(0.1, 1.9, 4.9, '#8c95a6', cx, 2.4, 34, g);
+    // 階段
+    const ramp = box(3, 0.3, 13.4, '#bfc4cc', cx, 4, 12, g); ramp.rotation.x = Math.atan2(6, 12);
+    for (let i = 0; i < 12; i++) box(3, 0.08, 0.15, '#8f96a3', cx, 7 - i * 0.5 + 0.12, 6.5 + i, g);
+    box(0.15, 1.1, 13.4, '#8c95a6', cx - 1.55, 4.6, 12, g).rotation.x = Math.atan2(6, 12);
+    box(0.15, 1.1, 13.4, '#8c95a6', cx + 1.55, 4.6, 12, g).rotation.x = Math.atan2(6, 12);
+    // 動ける場所（下：ホーム）
+    st.lower.push({ x0: cx - 2.75, x1: cx + 2.75, z0: -44, z1: 6 }, { x0: cx - 2.75, x1: cx + 2.75, z0: 18, z1: 44 },
+      { x0: cx - 2.75, x1: cx - 1.85, z0: 6, z1: 18 }, { x0: cx + 1.85, x1: cx + 2.75, z0: 6, z1: 18 });
+    st.stairs.push({ x0: cx - 1.35, x1: cx + 1.35, z0: 5.4, z1: 18.6, cx });
+    // 発車標
+    const bt = depBoardTex(sId, L); st.boards.push(bt);
+    plane(bt, 6.4, 3.25, g, cx, 10.5, 5.75, Math.PI);
+    // ホームの駅員さん
+    const sf = makePerson('#1b2a4a', { cap: true, leg: '#1b2a4a' }); sf.position.set(cx - 2.1, 1, 25); sf.rotation.y = Math.PI; g.add(sf);
+    st.staff.push({ obj: sf, level: 'lower' });
+    // 乗客
+    for (let i = 0; i < 5; i++) { const p = makePerson(['#6d8fb8', '#c46b6b', '#7fae7a', '#a48bc4', '#d6a24c'][i]); p.position.set(cx + (i % 2 ? 1.9 : -1.9), 1, -38 + i * 12 + (i > 2 ? 8 : 0)); p.rotation.y = i % 2 ? -Math.PI / 2 : Math.PI / 2; g.add(p); }
+  });
+  // コンコース（2階）
+  const slab = box(xmax + 14, 0.4, 12, '#e9e6df', (xmax - 14) / 2, 6.8, 0, g);
+  box(xmax + 14, 0.05, 12, '#d8d3c8', (xmax - 14) / 2, 7.01, 0, g).position.y = 7.01;
+  box(xmax + 14, 1.1, 0.15, '#a7b0bf', (xmax - 14) / 2, 7.55, -6, g);
+  for (const L of st.lines) { box(0.15, 1.1, 0.15, '#a7b0bf', L.cx - 1.6, 7.55, 6, g); box(0.15, 1.1, 0.15, '#a7b0bf', L.cx + 1.6, 7.55, 6, g); }
+  st.upper.push({ x0: -13.6, x1: xmax - 0.4, z0: -5.6, z1: 5.6 });
+  // 改札
+  for (const z of [-4.8, -2.4, 0, 2.4, 4.8]) { box(1.8, 1.0, 0.4, '#d7dbe2', -8, 7.5, z, g); box(0.3, 0.05, 0.3, '#2f6fd6', -8.5, 8.02, z, g); }
+  plane(signTex([['改札  のりば →', 'かいさつ　のりば']]), 6, 1.56, g, -6, 10.4, 0, -Math.PI / 2);
+  plane(signTex([['← 出口', 'でぐち']], '#f2c21a'), 4, 1.04, g, -6, 10.4, 0, Math.PI / 2);
+  plane(signTex([[SET.stations[sId].name + ' 駅', SET.stations[sId].kana + ' えき']]), 7, 1.82, g, -13.4, 10.5, 0, Math.PI / 2);
+  const sf = makePerson('#1b2a4a', { cap: true, leg: '#1b2a4a' }); sf.position.set(-5.5, 7, -4.3); sf.rotation.y = -Math.PI / 2; g.add(sf);
+  st.staff.push({ obj: sf, level: 'upper' });
+  station = st;
+  G.guide = null; guideArrow.visible = guideArrow2.visible = false;
+  return st;
+}
+
+/* ---------- 車内（乗っている間） ---------- */
+const rideScene = new THREE.Scene(); rideScene.background = new THREE.Color('#a9cdea');
+rideScene.add(new THREE.HemisphereLight('#ffffff', '#888888', 2.2));
+const rideCam = new THREE.PerspectiveCamera(62, 1, 0.1, 400); rideCam.position.set(-1.05, 2.55, 0); rideCam.lookAt(5, 2.3, 0);
+const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, shown: null };
+{
+  const g = rideScene;
+  box(3.4, 0.1, 30, '#c7b9a2', 0, 1, 0, g); box(3.4, 0.1, 30, '#f4f4f2', 0, 4.0, 0, g);
+  box(0.1, 1.05, 30, '#e7e9ee', 1.65, 1.5, 0, g); box(0.1, 0.55, 30, '#e7e9ee', 1.65, 3.75, 0, g);
+  for (const z of [-12, -6, 0, 6, 12]) box(0.1, 1.5, 0.7, '#e7e9ee', 1.65, 2.75, z, g);
+  box(0.1, 3, 30, '#e7e9ee', -1.7, 2.5, 0, g);
+  box(0.7, 0.45, 26, '#4f6fa8', 1.25, 1.35, 0, g); box(0.15, 0.6, 26, '#4f6fa8', 1.55, 1.75, 0, g);
+  for (const z of [-9, -3, 3, 9]) box(0.08, 3, 0.08, '#c9ced6', 0.9, 2.5, z, g);
+  box(0.6, 0.05, 28, '#fff8d8', 0, 3.94, 0, g);
+  [['#6d8fb8', -4.5], ['#c46b6b', 2.2], ['#7fae7a', 6.8]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.15, 0.65, z); p.rotation.y = -Math.PI / 2; p.scale.setScalar(1); g.add(p); });
+  box(400, 0.2, 400, '#9aa58e', 0, -0.4, 0, g);
+  let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 40; i++) { const h = 3 + rnd() * 16, w = 4 + rnd() * 6; const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), winMat); const z0 = -150 + i * 7.5; b.position.set(10 + rnd() * 40, h / 2, z0); b.userData.z0 = z0; g.add(b); RIDE.outside.push(b); }
+  for (let i = 0; i < 24; i++) { const p = box(0.2, 5, 0.2, '#666b75', 4.5, 2.5, 0, g); p.userData.z0 = -150 + i * 12.5; RIDE.outside.push(p); }
+  box(5, 1, 60, '#cfcabe', 5.2, 0.5, 0, RIDE.plat); box(0.35, 0.02, 60, '#f2c21a', 3.2, 1.01, 0, RIDE.plat);
+  for (let z = -24; z <= 24; z += 12) box(0.3, 4, 0.3, '#8c95a6', 6.5, 3, z, RIDE.plat);
+  g.add(RIDE.plat); RIDE.plat.visible = false;
+}
+function setRideSign(s, L) {
+  if (RIDE.shown === s) return; RIDE.shown = s;
+  if (RIDE.signMesh) { RIDE.plat.remove(RIDE.signMesh); RIDE.signMesh.material.map.dispose(); RIDE.signMesh.material.dispose(); RIDE.signMesh.geometry.dispose(); }
+  RIDE.signMesh = plane(nameBoardTex(s, L, false), 4.8, 1.8, RIDE.plat, 6.3, 2.4, 2, -Math.PI / 2);
+}
+
+/* =========================================================
+   音（Web Audio）
+   ========================================================= */
+let AC = null;
+const ac = () => AC || (AC = new (window.AudioContext || window.webkitAudioContext)());
+function tone(f, d, type = 'sine', gain = 0.12, when = 0) {
+  try { const c = ac(); const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = f; const t0 = c.currentTime + when;
+    g.gain.setValueAtTime(gain, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d); o.connect(g).connect(c.destination); o.start(t0); o.stop(t0 + d + 0.02); } catch (e) {}
+}
+const SND = {
+  gate() { tone(2400, 0.09, 'square', 0.05); tone(2400, 0.09, 'square', 0.05, 0.12); },
+  chime() { tone(988, 0.5); tone(784, 0.7, 'sine', 0.12, 0.45); },
+  door() { tone(1320, 0.18); tone(990, 0.25, 'sine', 0.1, 0.2); },
+  alert() { tone(440, 0.18, 'triangle', 0.14); tone(330, 0.3, 'triangle', 0.14, 0.2); },
+  ok() { tone(660, 0.12); tone(880, 0.12, 'sine', 0.12, 0.12); tone(1320, 0.25, 'sine', 0.1, 0.24); },
+  ring() { for (let i = 0; i < 3; i++) { tone(1400, 0.08, 'square', 0.05, i * 0.16); tone(1100, 0.08, 'square', 0.05, i * 0.16 + 0.08); } },
+  tap() { tone(1500, 0.05, 'sine', 0.06); },
+};
+
+/* =========================================================
+   UI
+   ========================================================= */
+const ICON = {
+  joy: '<svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" fill="#dfe6f2" stroke="#2c3f66" stroke-width="3"/><circle cx="26" cy="20" r="10" fill="#fff" stroke="#2c3f66" stroke-width="3"/><path d="M26 4l-4 5h8z" fill="#2c3f66"/></svg>',
+  sign: '<svg viewBox="0 0 52 52"><rect x="3" y="10" width="46" height="24" rx="3" fill="#1b2a4a"/><circle cx="14" cy="22" r="8" fill="#fff"/><text x="14" y="27" font-size="13" text-anchor="middle" font-weight="700" fill="#1b2a4a">2</text><rect x="25" y="16" width="18" height="5" fill="#2f6fd6"/><rect x="25" y="24" width="18" height="4" fill="#fff"/><rect x="24" y="34" width="4" height="14" fill="#8c95a6"/></svg>',
+  board: '<svg viewBox="0 0 52 52"><rect x="4" y="6" width="44" height="40" rx="10" fill="#1f9d55"/><text x="26" y="33" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">のる</text></svg>',
+  staff: '<svg viewBox="0 0 70 70"><circle cx="35" cy="26" r="13" fill="#f2cfa8"/><rect x="20" y="9" width="30" height="9" rx="3" fill="#1b2a4a"/><rect x="18" y="16" width="34" height="4" fill="#1b2a4a"/><path d="M14 68c0-16 9-26 21-26s21 10 21 26z" fill="#1b2a4a"/></svg>',
+  phone: '<svg viewBox="0 0 52 52"><rect x="14" y="3" width="24" height="46" rx="5" fill="#2c3f66"/><rect x="17" y="8" width="18" height="32" fill="#eef3ff"/><rect x="19" y="12" width="14" height="4" fill="#1f9d55"/><rect x="19" y="19" width="10" height="4" fill="#1f9d55"/></svg>',
+  meter: '<svg viewBox="0 0 52 52"><rect x="3" y="20" width="46" height="12" rx="6" fill="#e3e8f1"/><rect x="3" y="20" width="30" height="12" rx="6" fill="#d8432f"/><path d="M36 6l6 8h-12z" fill="#d8432f"/></svg>',
+};
+const HOWTO = [
+  [ICON.joy, '{左下|ひだりした}のスティックで {歩|ある}く。{画面|がめん}を ドラッグすると {見|み}る{向|む}きが かわる。'],
+  [ICON.sign, '{案内板|あんないばん}の「{番線|ばんせん}」と「{方面|ほうめん}」を {見|み}て、ホームへ。{右下|みぎした}の「{案内|あんない}」で のりかえ{案内|あんない}を {見|み}なおせる。'],
+  [ICON.board, 'ドアが {開|ひら}いたら「のる」。{車内|しゃない}の{表示|ひょうじ}を {見|み}て、おりる{駅|えき}で「おりる」。'],
+  [ICON.staff, '{駅員|えきいん}さんの {近|ちか}くで「きく」。どの{電車|でんしゃ}に のればよいか おしえてくれる。'],
+  [ICON.phone, 'まちがえたり おくれそうな ときは「{連絡|れんらく}」。だれ・どこ・{何分|なんぷん}・どうするか を つたえる。'],
+  [ICON.meter, '{困|こま}り{度|ど}：トラブルの あと、{連絡|れんらく}が おそいほど {早|はや}く ふえる。{早|はや}く・わかりやすく つたえると ゆっくりになる。'],
+];
+function renderHowto(el) { el.innerHTML = HOWTO.map(([ic, t]) => `<div class="how">${ic}<div>${rb(t)}</div></div>`).join(''); }
+renderHowto($('#howto1')); renderHowto($('#howto2'));
+
+function renderChoices() {
+  const sc = [['school', '{学校|がっこう}へ{行|い}く', '{担任|たんにん}の{先生|せんせい}に {連絡|れんらく}'], ['work', '{職場|しょくば}{体験|たいけん}', '{職場|しょくば}の{人|ひと}に {連絡|れんらく}']];
+  $('#chScene').innerHTML = sc.map(([k, a, b]) => `<button class="choice ${G.sceneKey === k ? 'sel' : ''}" data-k="${k}"><b>${rb(a)}</b>${rb(b)}</button>`).join('');
+  const lv = [[1, 'レベル1', '{乗|の}りかえなし（1つの{電車|でんしゃ}）'], [2, 'レベル2', '{乗|の}りかえ 1{回|かい}']];
+  $('#chLevel').innerHTML = lv.map(([k, a, b]) => `<button class="choice ${G.level === k ? 'sel' : ''}" data-l="${k}"><b>${a}</b>${rb(b)}</button>`).join('');
+}
+renderChoices();
+$('#chScene').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) { G.sceneKey = b.dataset.k; SND.tap(); renderChoices(); } });
+$('#chLevel').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (b) { G.level = +b.dataset.l; SND.tap(); renderChoices(); } });
+
+function openOv(id) { $('#' + id).hidden = false; G.modals.add(id); }
+function closeOv(id) { $('#' + id).hidden = true; G.modals.delete(id); }
+const paused = () => G.modals.size > 0;
+
+let bannerTimer = 0;
+function banner(html, kind = 'info', sec = 5) { const b = $('#banner'); b.className = 'panel ' + kind; b.innerHTML = rb(html); b.hidden = false; bannerTimer = sec; }
+
+/* ---------- せってい ---------- */
+function renderSettings() {
+  const f = (label, key, a, b) => `<label class="field">${rb(label)}<div class="two"><input id="${key}_n" value="${esc(a)}" maxlength="12" aria-label="名前"><input id="${key}_k" value="${esc(b)}" maxlength="16" placeholder="よみ" aria-label="よみ"></div></label>`;
+  let h = '';
+  for (const L of LINE_ORDER) {
+    h += `<h3>${rb(ln(L))}</h3><div class="set-grid">${f('{路線|ろせん}の{名前|なまえ}・よみ', 'L_' + L, SET.lines[L].name, SET.lines[L].kana)}`;
+    LN(L).stations.forEach((s, i) => { if (L === 'midori' && s === TRANSFER) return; h += f(`${i + 1}. {駅|えき}${s === TRANSFER ? '（{乗|の}りかえ{駅|えき}）' : ''}`, 'S_' + s, SET.stations[s].name, SET.stations[s].kana); });
+    h += '</div>';
+  }
+  const p = SET.people;
+  h += `<h3>{連絡|れんらく}の{相手|あいて}・じぶん</h3>`.replace(/\{([^|]+)\|([^}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
+  h += `<div class="set-grid">${f('{先生|せんせい}の{名前|なまえ}・よみ', 'P_teacher', p.teacher.name, p.teacher.kana)}${f('{職場|しょくば}の{人|ひと}の{名前|なまえ}・よみ', 'P_boss', p.boss.name, p.boss.kana)}
+   <label class="field">${rb('{学校|がっこう}の{名前|なまえ}')}<input id="P_school" value="${esc(p.school)}" maxlength="16"></label>
+   <label class="field">${rb('じぶんの{名前|なまえ}')}<input id="P_player" value="${esc(p.player)}" maxlength="12" placeholder="なまえ"></label></div>`;
+  $('#setBody').innerHTML = h;
+}
+function readSettings() {
+  const v = id => { const e = document.getElementById(id); return e ? esc(e.value.trim()) : ''; };
+  for (const L of LINE_ORDER) { SET.lines[L].name = v('L_' + L + '_n') || SET.lines[L].name; SET.lines[L].kana = v('L_' + L + '_k'); }
+  for (const s of Object.keys(SET.stations)) { const n = v('S_' + s + '_n'); if (n) { SET.stations[s].name = n; SET.stations[s].kana = v('S_' + s + '_k'); } }
+  SET.people.teacher = { name: v('P_teacher_n') || '先生', kana: v('P_teacher_k') };
+  SET.people.boss = { name: v('P_boss_n') || '担当の人', kana: v('P_boss_k') };
+  SET.people.school = v('P_school'); SET.people.player = v('P_player');
+}
+$('#btnSettings').onclick = () => { renderSettings(); openOv('ovSettings'); };
+$('#btnSetReset').onclick = () => { resetSettings(); renderSettings(); };
+$('#btnSetClose').onclick = () => { readSettings(); closeOv('ovSettings'); buildStation('moridai'); };
+
+/* ---------- のりかえ案内 ---------- */
+function makePlan() {
+  const m = G.mission, tL = destLine(), legs = [];
+  const add = (L, from, to, tE) => {
+    const i = idxOf(from, L), j = idxOf(to, L), dir = Math.sign(j - i), k = firstK(L, dir, i, tE);
+    const leg = { L, dir, k, from, to, i, j, plat: arrT(L, dir, k, i, true), dep: depT(L, dir, k, i, true), arr: arrT(L, dir, k, j, true), track: trackNum(from, L, dir), stops: Math.abs(j - i) };
+    legs.push(leg); return leg;
+  };
+  const tE = m.start + CFG.planWalkMin;
+  if (idxOf(m.from, tL) >= 0) add(tL, m.from, m.to, tE);
+  else { const a = add(linesAt(m.from)[0], m.from, TRANSFER, tE); add(tL, TRANSFER, m.to, a.arr + CFG.transferMin); }
+  return { legs, deadline: Math.ceil(legs[legs.length - 1].arr + CFG.exitMin) };
+}
+function renderPlan(first) {
+  const P = G.plan;
+  $('#planTitle').innerHTML = rb('のりかえ{案内|あんない}');
+  const story = G.sceneKey === 'school'
+    ? `{今日|きょう}は {電車|でんしゃ}で {学校|がっこう}へ {行|い}きます。${fm(P.deadline)}までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}れば、{朝|あさ}の{会|かい}に {間|ま}に{合|あ}います。`
+    : `{今日|きょう}は {職場|しょくば}{体験|たいけん}。{電車|でんしゃ}で お{店|みせ}へ {行|い}きます。${fm(P.deadline)}までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}れば、{仕事|しごと}の{始|はじ}まりに {間|ま}に{合|あ}います。`;
+  $('#planStory').innerHTML = rb(story);
+  let h = '';
+  P.legs.forEach((leg, n) => {
+    const col = LN(leg.L).color;
+    h += `<div class="leg"><div class="tm">${fm(leg.dep)}<div style="font-size:13px;font-weight:400">${rb('{発|はつ}')}</div></div><div class="node"></div><div class="stn">${rb(sn(leg.from))}${n ? rb(' <span style="font-size:15px;color:#d8432f">{乗|の}りかえ</span>') : ''}</div></div>`;
+    h += `<div class="leg"><div></div><div class="bar" style="background:${col}"></div><div class="ride"><span class="chip" style="background:${col}">${rb(ln(leg.L))}</span>${rb(sn(termName(leg.L, leg.dir)))}${rb('{方面|ほうめん}')}<br><span class="trk">${leg.track}${rb('{番線|ばんせん}')}</span>　${rb(`${leg.stops}{駅|えき}　（${minTxt(Math.round(leg.arr - leg.dep))}）`)}</div></div>`;
+  });
+  const last = P.legs[P.legs.length - 1];
+  h += `<div class="leg"><div class="tm">${fm(last.arr)}<div style="font-size:13px;font-weight:400">${rb('{着|ちゃく}')}</div></div><div class="node"></div><div class="stn">${rb(sn(last.to))}</div></div>`;
+  h += `<div class="deadline">${rb(`${fm(P.deadline)} までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}る`)}</div>`;
+  $('#planBody').innerHTML = h;
+  $('#btnPlanClose').textContent = first ? 'しゅっぱつ' : 'とじる';
+}
+$('#btnPlan').onclick = () => { if (!G.plan) return; renderPlan(false); openOv('ovPlan'); };
+$('#btnPlanClose').onclick = () => { closeOv('ovPlan'); };
+
+/* ---------- 連絡（スマホ） ---------- */
+let PH = null;
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function openPhone(incoming) {
+  const here = G.phase === 'ride' ? null : station.id;
+  const where = G.phase === 'ride' ? { txt: `${ln(G.ride.L)}の {電車|でんしゃ}の{中|なか}です`, ok: true } : { txt: `${sn(here)}{駅|えき}に います`, ok: true };
+  const others = shuffle(Object.keys(SET.stations).filter(s => s !== here && s !== G.mission.to)).slice(0, 2).map(s => ({ txt: `${sn(s)}{駅|えき}に います`, ok: false }));
+  const NONE = { txt: '（いわない）', ok: false, none: true };
+  const school = SET.people.school ? esc(SET.people.school) + 'の ' : '';
+  const me = SET.people.player ? esc(SET.people.player) : '（じぶんの{名前|なまえ}）';
+  PH = { incoming, sel: {}, rows: [
+    { key: 'name', lab: 'だれ？（{名前|なまえ}）', opts: [{ txt: `${school}${me}です`, ok: true }, NONE] },
+    { key: 'where', lab: 'いま どこ？', opts: [...shuffle([where, ...others]), NONE] },
+    { key: 'late', lab: 'どのくらい おくれそう？', opts: [5, 10, 20, 30].map(n => ({ txt: `${minTxt(n)}くらい おくれます`, ok: true, n })).concat([NONE]) },
+    { key: 'plan', lab: 'これから どうする？', opts: [{ txt: '{次|つぎ}の {電車|でんしゃ}で {向|む}かいます', ok: true }, { txt: '{駅員|えきいん}さんに きいて {向|む}かいます', ok: true }, { txt: 'このまま {電車|でんしゃ}に のっています', ok: false }, NONE] },
+  ] };
+  $('#phWho').innerHTML = rb(`${contactMk()} ${incoming ? 'から {電話|でんわ}' : 'に {連絡|れんらく}'}`);
+  const ask = $('#phAsk'); ask.hidden = !incoming;
+  ask.innerHTML = rb(`「もしもし、${contactMk()}です。まだ {着|つ}いていないけど、だいじょうぶ？」`);
+  renderPhone(); openOv('ovPhone');
+}
+function renderPhone() {
+  $('#phRows').innerHTML = PH.rows.map(r => `<div class="prow"><div class="lab">${rb(r.lab)}</div><div class="opts">${r.opts.map((o, i) => `<button class="opt ${o.none ? 'none' : ''} ${PH.sel[r.key] === i ? 'sel' : ''}" data-r="${r.key}" data-i="${i}">${rb(o.txt)}</button>`).join('')}</div></div>`).join('');
+  const parts = PH.rows.map(r => PH.sel[r.key] != null && !r.opts[PH.sel[r.key]].none ? r.opts[PH.sel[r.key]].txt : '').filter(Boolean);
+  $('#phPrev').innerHTML = parts.length ? rb((PH.incoming ? '' : 'もしもし。') + parts.join('。') + '。') : rb('<span style="color:#888">うえから えらんでね</span>');
+}
+$('#phRows').addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b) return; PH.sel[b.dataset.r] = +b.dataset.i; SND.tap(); renderPhone(); });
+$('#btnPhCancel').onclick = () => { if (PH.incoming) { banner('{電話|でんわ}は きれません。つたえる ことを えらんでね', 'call', 3); return; } closeOv('ovPhone'); };
+$('#btnPhSend').onclick = () => {
+  if (PH.rows.some(r => PH.sel[r.key] == null)) { banner('ぜんぶの {行|ぎょう}で えらんでね（いわない も えらべます）', 'call', 3); return; }
+  closeOv('ovPhone'); report(PH.rows.map(r => ({ key: r.key, ...r.opts[PH.sel[r.key]] })), PH.incoming);
+};
+function report(items, incoming) {
+  const q = items.filter(i => i.ok).length;
+  const active = G.firstTroubleT != null && G.exitT == null;
+  let msg;
+  if (!active) {
+    msg = G.sceneKey === 'school' ? '{予定|よてい}どおりなら、{連絡|れんらく}は いらないよ。{気|き}をつけて {来|き}てね。' : '{予定|よてい}どおりでしたら、{大丈夫|だいじょうぶ}ですよ。お{待|ま}ちしています。';
+  } else {
+    G.reportedOk = true; G.quality = q;
+    const late = items.find(i => i.key === 'late');
+    G.reports.push({ t: G.t, q, est: late && late.n, incoming, sinceTrouble: G.t - G.lastTroubleT });
+    const miss = items.filter(i => !i.ok).map(i => i.key);
+    const need = { name: 'だれから？ {名前|なまえ}も {言|い}ってね', where: 'いま どこに いるの？', late: '{何分|なんぷん}くらい おくれそう？', plan: 'これから どうするの？' };
+    if (q === 4) msg = G.sceneKey === 'school' ? 'よく わかりました。{連絡|れんらく}ありがとう。あわてず、{気|き}をつけて {来|き}てね。' : 'ご{連絡|れんらく} ありがとうございます。よく わかりました。{気|き}をつけて {来|き}てください。';
+    else msg = 'わかった、ありがとう。でも…<br>' + miss.map(k => '・' + need[k]).join('<br>') + '<br><span style="font-size:15px;color:#5b6b88">（つたえることが そろうほど、{困|こま}り{度|ど}が ふえにくくなります）</span>';
+    SND.ok();
+  }
+  $('#rpWho').innerHTML = rb(contactMk());
+  $('#rpText').innerHTML = rb(msg); openOv('ovReply');
+}
+$('#btnRpClose').onclick = () => closeOv('ovReply');
+$('#btnPhone').onclick = () => { if (G.phase === 'station' || G.phase === 'ride') { $('#btnPhone').classList.remove('ring'); openPhone(false); } };
+$('#btnCallAns').onclick = () => { closeOv('ovCall'); $('#btnPhone').classList.remove('ring'); openPhone(true); };
+
+/* ---------- 駅員さん ---------- */
+function consult() {
+  G.consulted = true;
+  const s = station.id; const c = correctBoard(s); const dest = G.mission.to;
+  let say;
+  const opts = [];
+  if (!c) say = `ここが ${sn(dest)}{駅|えき}ですよ。{改札|かいさつ}は {階段|かいだん}を のぼった {先|さき}です。`;
+  else {
+    const num = trackNum(s, c.line, c.dir), term = termName(c.line, c.dir);
+    say = `${sn(dest)}へは、<b>${num}{番線|ばんせん}</b>の ${ln(c.line)}　${sn(term)}{方面|ほうめん}に のってください。`;
+    if (c.line !== destLine()) say += `<br>${sn(TRANSFER)}で ${ln(destLine())}に のりかえです。`;
+    if (G.firstTroubleT != null) say += `<br>あわてなくて {大丈夫|だいじょうぶ}ですよ。${placeMk()}には {連絡|れんらく}しましたか？`;
+    setGuide(c.line, c.dir);
+  }
+  $('#stSay').innerHTML = rb(`「${say}」`);
+  $('#stOpts').innerHTML = `<button class="big-btn">${rb('ありがとうございます')}</button>`;
+  $('#stOpts').firstChild.onclick = () => closeOv('ovStaff');
+  openOv('ovStaff');
+}
+function setGuide(L, dir) {
+  const tr = station.tracks.find(t => t.L === L && t.dir === dir); if (!tr) return;
+  G.guide = { x: tr.cx + dir * 1.7, z: 22, x2: tr.cx };
+  guideArrow.visible = guideArrow2.visible = true;
+}
+
+/* ---------- 結果 ---------- */
+const KIND = {
+  miss: '{予定|よてい}の {電車|でんしゃ}に のれなかった', wrong: 'ちがう {方向|ほうこう}の {電車|でんしゃ}に のった',
+  pass: 'おりる {駅|えき}を {通|とお}りすぎた', early: '{手前|てまえ}の {駅|えき}で おりてしまった',
+  doze: 'うとうとして おりる {駅|えき}を {通|とお}りすぎた', delay: '{電車|でんしゃ}が おくれた（{信号|しんごう}{点検|てんけん}）',
+};
+function finish(timeout) {
+  G.exitT = G.t; G.timeout = timeout; G.phase = 'result'; G.ff = false;
+  const late = Math.max(0, G.exitT - G.plan.deadline);
+  const lateP = timeout ? 0 : late * CFG.latePerMin;
+  const hadT = G.firstTroubleT != null;
+  const noRep = hadT && G.reports.length === 0;
+  const actual = G.damage + lateP + (noRep && !timeout ? CFG.noContactPenalty : 0);
+  const tm = hadT ? G.exitT - G.firstTroubleT : 0;
+  const best = tm * CFG.rateByQuality[4] + lateP, worst = tm * CFG.rateUnreported + lateP + CFG.noContactPenalty;
+  G.result = { late, actual, best, worst, tm };
+  $('#resTitle').innerHTML = rb(timeout ? '{時間|じかん}{切|ぎ}れ…' : (late > 0.05 ? `とうちゃく！（${minTxt(Math.ceil(late))} おくれ）` : 'とうちゃく！ {間|ま}に{合|あ}った'));
+  const r1 = G.reports[0];
+  const rows = [
+    ['{改札|かいさつ}を{出|で}た', timeout ? '—' : `${fm(G.exitT)}（しめきり ${fm(G.plan.deadline)}）`],
+    ['トラブル', hadT ? G.troubles.map(t => `${fm(t.t)} ${KIND[t.kind]}`).join('<br>') : 'なし'],
+    ['{連絡|れんらく}', !hadT ? '（ひつようなし）' : r1 ? `トラブルから ${minTxt(Math.max(0, Math.round(r1.sinceTrouble)))}あと${r1.incoming ? '（{相手|あいて}からの {電話|でんわ}）' : ''}<br>つたえたこと ${'●'.repeat(r1.q)}${'○'.repeat(4 - r1.q)}（4つ{中|ちゅう} ${r1.q}つ）${G.reports.length > 1 ? `<br>そのあとも ${G.reports.length - 1}{回|かい} {連絡|れんらく}した` : ''}` : 'していない'],
+    ['{駅員|えきいん}さんに {相談|そうだん}', G.consulted ? 'できた' : 'していない'],
+  ];
+  if (r1 && r1.est && !timeout) rows.push(['おくれの よそう', `${minTxt(r1.est)} → じっさい ${minTxt(Math.ceil(late))}`]);
+  $('#resList').innerHTML = rows.map(([a, b]) => `<dt>${rb(a)}</dt><dd>${rb(b)}</dd>`).join('');
+  const mx = Math.max(actual, worst, 1);
+  const bar = (lab, v, c) => `<div class="brow"><span>${rb(lab)}</span><div class="btrack"><i style="width:${(v / mx * 100).toFixed(1)}%;background:${c}"></i></div><b>${Math.round(v)}</b></div>`;
+  $('#resBars').innerHTML = hadT
+    ? bar('あなた', actual, '#2c3f66') + bar('すぐに 4つ つたえたら', best, '#1f9d55') + bar('{自分|じぶん}から {連絡|れんらく}しなかったら', worst, '#d8432f')
+    : `<p>${rb('トラブルが なかったので {困|こま}り{度|ど}は 0。つぎは レベルを かえて ためしてみよう。')}</p>`;
+  $('#resLesson').innerHTML = rb(hadT
+    ? `トラブルは だれにでも おきます。{大切|たいせつ}なのは そのあと。<b>{早|はや}く</b>・<b>わかりやすく</b>（だれ・どこ・{何分|なんぷん}・どうする）つたえると、まっている {人|ひと}の {困|こま}り{度|ど}は {小|ちい}さくなります。わからない ときは {駅員|えきいん}さんに {相談|そうだん}しよう。`
+    : `{乗|の}りかえ{案内|あんない}を {読|よ}んで、{予定|よてい}どおりに {着|つ}けました。もしも のときは「{早|はや}く {連絡|れんらく}」を {思|おも}い{出|だ}そう。`);
+  $('#hud').hidden = true; $('#doze').hidden = true;
+  openOv('ovResult');
+}
+$('#btnResAgain').onclick = () => { closeOv('ovResult'); startMission(); };
+$('#btnResMenu').onclick = () => { closeOv('ovResult'); G.phase = 'title'; buildStation('moridai'); renderChoices(); openOv('ovStart'); };
+
+/* =========================================================
+   ゲーム進行
+   ========================================================= */
+function startMission() {
+  if (station) station.group.visible = true;
+  const m = CFG.scenes[G.sceneKey].missions[G.level];
+  Object.assign(G, { mission: m, delay: null, t: m.start, ride: null, lastAlight: null, troubles: [], onPlan: true, legIdx: 0,
+    firstTroubleT: null, lastTroubleT: null, reportedOk: false, quality: 0, reports: [], damage: 0, consulted: false,
+    worryStep: 0, callShown: false, called: false, dozeDone: false, dozing: false, delayAnnounced: false, delayTrigger: 1e9, exitT: null, timeout: false, ff: false, result: null });
+  G.plan = makePlan();
+  if (CFG.levelEvent[G.level] === 'delay' && G.plan.legs.length > 1) {
+    const leg = G.plan.legs[1];
+    G.delay = { L: leg.L, dir: leg.dir, k: leg.k - 1, min: CFG.delayMin };
+    G.delayTrigger = arrT(leg.L, leg.dir, leg.k - 1, leg.i, true) - 2;
+  }
+  buildStation(m.from);
+  Object.assign(G.P, { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2 });
+  G.cam.yaw = 0; G.phase = 'station';
+  $('#hud').hidden = false; $('#led').hidden = true; $('#banner').hidden = true; $('#btnPhone').classList.remove('ring');
+  $('#tGoal').innerHTML = rb(`${fm(G.plan.deadline)}までに ${sn(m.to)}{駅|えき}の{改札|かいさつ}を{出|で}る`);
+  renderPlan(true); openOv('ovPlan');
+}
+$('#btnStart').onclick = () => {
+  try { ac().resume(); } catch (e) {}
+  SND.tap(); closeOv('ovStart'); startMission();
+};
+$('#btnHelp').onclick = () => openOv('ovHelp');
+$('#btnHelpClose').onclick = () => closeOv('ovHelp');
+$('#btnFF').onclick = () => { G.ff = !G.ff; };
+
+function trouble(kind) {
+  if (G.exitT != null) return;
+  G.troubles.push({ kind, t: G.t }); G.onPlan = false;
+  if (G.firstTroubleT == null) G.firstTroubleT = G.t;
+  G.lastTroubleT = G.t; G.reportedOk = false; G.worryStep = 0; G.callShown = false; G.ff = false;
+  const after = G.reports.length ? '<br>（{前|まえ}に {連絡|れんらく}したときと {状況|じょうきょう}が かわった）' : '';
+  banner(`${KIND[kind]}！<br>このままだと {予定|よてい}に {間|ま}に{合|あ}わない。どうする？${after}`, 'warn', 7);
+  SND.alert();
+}
+
+/* --- 動ける場所 --- */
+const inR = (r, x, z) => x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1;
+function test(x, z) {
+  const P = G.P;
+  for (const s of station.stairs) if (inR(s, x, z)) {
+    if (P.onStair || (P.level === 'upper' && z < 6.5) || (P.level === 'lower' && z > 17.5)) return { stair: s };
+    return null;
+  }
+  if (P.onStair) {
+    if (z < 6.2 && station.upper.some(r => inR(r, x, z))) return { level: 'upper' };
+    if (z > 17.8 && station.lower.some(r => inR(r, x, z))) return { level: 'lower' };
+    return null;
+  }
+  return station[P.level].some(r => inR(r, x, z)) ? { level: P.level } : null;
+}
+function moveTo(nx, nz) {
+  const P = G.P, ox = P.x;
+  let res = test(nx, nz);
+  if (!res) { res = test(nx, P.z); if (res) nz = P.z; else { res = test(P.x, nz); if (res) nx = P.x; else return; } }
+  // 改札
+  if (P.level === 'upper' && !P.onStair && ((ox >= -8) !== (nx >= -8))) {
+    if (nx < -8) {
+      if (station.id === G.mission.to) { P.x = nx; P.z = nz; SND.gate(); banner(`{改札|かいさつ}を {出|で}た！`, 'info', 3); finish(false); return; }
+      banner(station.id === G.mission.from && G.phase === 'station' ? 'ここは {出発|しゅっぱつ}の {駅|えき}。{電車|でんしゃ}に のろう' : 'ここは おりる {駅|えき}では ありません', 'info', 3); return;
+    } else SND.gate();
+  }
+  P.x = nx; P.z = nz;
+  if (res.stair) { P.onStair = true; P.y = 7 - Math.min(1, Math.max(0, (nz - 6) / 12)) * 6; if (nz < 6.1) P.level = 'upper'; else if (nz > 17.9) P.level = 'lower'; }
+  else { P.onStair = false; P.level = res.level; P.y = res.level === 'upper' ? 7 : 1; }
+}
+
+/* --- 電車の位置（時刻表から決まる） --- */
+function updateTrains() {
+  for (const tr of station.tracks) {
+    const { L, dir, idx } = tr; tr.cur = null;
+    const kc = Math.floor((G.t - arrT(L, dir, 0, idx, true)) / CFG.headway);
+    for (let k = Math.max(0, kc - 4); k <= kc + 1; k++) {
+      const arr = arrT(L, dir, k, idx), dep = arr + CFG.dwellMin;
+      if (G.t >= arr - CFG.approachMin && G.t <= dep + CFG.leaveMin) {
+        let z = 0;
+        if (G.t < arr) { const u = (arr - G.t) / CFG.approachMin; z = -dir * u * u * 170; }
+        else if (G.t > dep) { const v = (G.t - dep) / CFG.leaveMin; z = dir * v * v * 170; }
+        tr.cur = { k, arr, dep, z, open: G.t >= arr && G.t < dep, terminating: idx === endIdx(L, dir) };
+        break;
+      }
+    }
+    tr.train.visible = !!tr.cur;
+    if (tr.cur) { tr.train.position.z = tr.cur.z; setDoors(tr.train, tr.cur.open); }
+  }
+}
+function nearTrain() {
+  const P = G.P; if (P.level !== 'lower' || P.onStair) return null;
+  for (const tr of station.tracks) {
+    const c = tr.cur; if (!c || !c.open || c.terminating) continue;
+    if (Math.sign(P.x - tr.cx) === tr.dir && Math.abs(P.x - tr.cx) > 1.7 && Math.abs(P.z - c.z) < 29) return tr;
+  }
+  return null;
+}
+function nearStaff() {
+  const P = G.P;
+  return station.staff.find(s => s.level === P.level && !P.onStair && Math.hypot(s.obj.position.x - P.x, s.obj.position.z - P.z) < 2.8);
+}
+
+function board(tr) {
+  const c = tr.cur;
+  G.ride = { L: tr.L, dir: tr.dir, k: c.k, i: tr.idx, boardedAt: tr.idx, wrongCounted: false };
+  if (G.lastAlight && G.lastAlight.L === tr.L && G.lastAlight.dir === tr.dir && G.lastAlight.k === c.k) G.lastAlight = null;
+  G.phase = 'ride'; RIDE.shown = null; SND.door();
+  station.group.visible = false; player.visible = false; guideArrow.visible = guideArrow2.visible = false;
+}
+function alight(forced) {
+  const R = G.ride; const s = LN(R.L).stations[R.i];
+  const c = correctBoard(s);
+  const contOk = !forced && R.i !== R.boardedAt && c && c.line === R.L && c.dir === R.dir && !R.wrongCounted;
+  G.lastAlight = contOk ? { L: R.L, dir: R.dir, k: R.k, i: R.i } : null;
+  const leg = G.plan.legs[G.legIdx]; if (leg && s === leg.to) G.legIdx++;
+  const L = R.L, dir = R.dir; G.ride = null;
+  enterStationFromTrain(s, L, dir);
+  if (forced) banner('{終点|しゅうてん}です。{電車|でんしゃ}を おりました', 'info', 4);
+}
+function enterStationFromTrain(s, L, dir) {
+  buildStation(s); station.group.visible = true; player.visible = true;
+  const tr = station.tracks.find(t => t.L === L && t.dir === dir);
+  Object.assign(G.P, { x: tr.cx + dir * 2.3, y: 1, z: -8, level: 'lower', onStair: false, face: dir > 0 ? -Math.PI / 2 : Math.PI / 2 });
+  G.cam.yaw = Math.PI / 2; G.phase = 'station'; $('#led').hidden = true;
+  updateTrains();
+}
+function rideDepart(i) {
+  const R = G.ride; const s = LN(R.L).stations[i]; const c = correctBoard(s);
+  const ok = c && c.line === R.L && c.dir === R.dir;
+  if (!ok && !R.wrongCounted) { R.wrongCounted = true; trouble(G.dozing ? 'doze' : (R.boardedAt === i ? 'wrong' : 'pass')); }
+}
+
+/* --- 1ステップ --- */
+function update(dtReal) {
+  G.frames++; G.elapsed += dtReal;
+  if (bannerTimer > 0) { bannerTimer -= dtReal; if (bannerTimer <= 0) $('#banner').hidden = true; }
+  if (G.phase !== 'station' && G.phase !== 'ride') return;
+  if (paused()) return;
+  const scale = CFG.timeScale * (G.ff ? CFG.ffScale : 1);
+  const dtMin = dtReal * scale / 60;
+  G.t += dtMin;
+  const dtScale = dtReal * 60;
+
+  // 困り度
+  if (G.firstTroubleT != null) G.damage += (G.reportedOk ? CFG.rateByQuality[G.quality] : CFG.rateUnreported) * dtMin;
+  // 相手の心配・電話
+  if (G.firstTroubleT != null && !G.reportedOk) {
+    const el = G.t - G.lastTroubleT;
+    if (G.worryStep === 0 && el >= CFG.worryAt[0]) { G.worryStep = 1; banner(`${contactMk()}「まだかな……」`, 'call', 4); }
+    if (G.worryStep === 1 && el >= CFG.worryAt[1]) { G.worryStep = 2; banner(`${contactMk()}「{連絡|れんらく}がない。{心配|しんぱい}だな……」`, 'call', 5); }
+    if (!G.callShown && el >= CFG.callAfterMin) { G.callShown = true; G.called = true; G.ff = false; SND.ring(); $('#callWho').innerHTML = rb(contactMk()); $('#btnPhone').classList.add('ring'); openOv('ovCall'); }
+  }
+  // レベル2：電車の遅れ
+  if (G.delay && !G.delayAnnounced && G.exitT == null) {
+    const atT = G.phase === 'station' && station.id === TRANSFER;
+    const onIt = G.ride && G.ride.L === G.delay.L && G.ride.dir === G.delay.dir;
+    const atDest = G.phase === 'station' && station.id === G.mission.to;
+    if ((G.t >= G.delayTrigger || atT) && !onIt && !atDest) {
+      G.delayAnnounced = true; SND.chime();
+      trouble('delay');
+      banner(`${atT ? 'えきの ほうそう' : 'スマホに {運行|うんこう}{情報|じょうほう}'}：${ln(G.delay.L)}は {信号|しんごう}{点検|てんけん}のため、やく${minTxt(G.delay.min)} おくれています`, 'warn', 8);
+    }
+  }
+  // 予定の電車に乗れたか
+  if (G.onPlan) {
+    const leg = G.plan.legs[G.legIdx];
+    if (leg && G.t > leg.dep + 0.02) {
+      const R = G.ride; const onIt = R && R.L === leg.L && R.dir === leg.dir && !R.wrongCounted;
+      const atDest = G.phase === 'station' && station.id === G.mission.to;
+      if (!onIt && !atDest) trouble('miss');
+    }
+  }
+  // 時間切れ
+  if (G.t > G.plan.deadline + CFG.giveUpMin) { finish(true); return; }
+
+  if (G.phase === 'station') {
+    // 手前でおりた電車が出ていった
+    if (G.lastAlight) { const a = G.lastAlight; if (G.t >= depT(a.L, a.dir, a.k, a.i)) { G.lastAlight = null; trouble('early'); } }
+    const P = G.P, { jx, jy } = G.input; const mag = Math.min(1, Math.hypot(jx, jy));
+    if (mag > 0.08) {
+      const y = G.cam.yaw, fx = Math.cos(y), fz = Math.sin(y);
+      const vx = fx * jy - fz * jx, vz = fz * jy + fx * jx; const n = Math.hypot(vx, vz) || 1;
+      const sp = CFG.walkSpeed * mag * dtScale / 60;
+      P.face = Math.atan2(vx, vz);
+      moveTo(P.x + vx / n * sp, P.z + vz / n * sp);
+      if (G.phase !== 'station') return;
+    }
+    updateTrains();
+    if (Math.floor(G.t * 2) !== station.lastBoard) { station.lastBoard = Math.floor(G.t * 2); station.boards.forEach(redraw); }
+  } else if (G.phase === 'ride') {
+    const R = G.ride;
+    let guard = 0;
+    while (guard++ < 20) {
+      const arr = arrT(R.L, R.dir, R.k, R.i), dep = arr + CFG.dwellMin;
+      if (R.i === endIdx(R.L, R.dir)) { if (G.t >= arr + 0.15 && !G.dozing) { alight(true); return; } break; }
+      if (G.t >= dep) { rideDepart(R.i); R.i += R.dir; continue; }
+      break;
+    }
+    // レベル1：うとうと
+    const tI = targetIdx(R.L);
+    if (CFG.levelEvent[G.level] === 'doze' && !G.dozeDone && G.troubles.length === 0 && !R.wrongCounted && R.i === tI && R.boardedAt !== R.i && R.dir === Math.sign(tI - R.boardedAt) && G.t >= arrT(R.L, R.dir, R.k, R.i) - 0.5) {
+      G.dozeDone = true; G.dozing = true; G.ff = false; $('#doze').hidden = false;
+    }
+    if (G.dozing && R.i !== tI && G.t >= depT(R.L, R.dir, R.k, tI) + 0.35) {
+      G.dozing = false; $('#doze').hidden = true;
+      banner(`はっ！ ねてしまった……。{次|つぎ}は ${sn(LN(R.L).stations[R.i])}`, 'warn', 6);
+    }
+  }
+}
+
+/* --- 表示の更新 --- */
+let ledKey = '';
+function updateRideView(dtReal) {
+  const R = G.ride; const L = R.L, st = LN(L).stations;
+  const arr = arrT(L, R.dir, R.k, R.i), dep = arr + CFG.dwellMin;
+  const prevI = R.i - R.dir; const hasPrev = prevI >= 0 && prevI < st.length && prevI !== undefined && R.i !== R.boardedAt;
+  const depPrev = hasPrev ? depT(L, R.dir, R.k, prevI) : -1e9;
+  const stopped = G.t >= arr;
+  let speed = 0;
+  if (!stopped) speed = 38 * Math.max(0.12, Math.min(1, (G.t - depPrev) / 0.35, (arr - G.t) / 0.35));
+  RIDE.offset += speed * dtReal * (G.ff ? 2 : 1);
+  for (const b of RIDE.outside) b.position.z = ((b.userData.z0 - RIDE.offset) % 300 + 300) % 300 - 150;
+  // ホーム
+  let pz = null, ps = null;
+  if (stopped) { pz = 0; ps = st[R.i]; }
+  else if (hasPrev && G.t - depPrev < 0.35) { pz = -Math.pow((G.t - depPrev) / 0.35, 2) * 70; ps = st[prevI]; }
+  else if (arr - G.t < 0.35) { pz = Math.pow((arr - G.t) / 0.35, 2) * 70; ps = st[R.i]; }
+  RIDE.plat.visible = pz != null; if (ps) { RIDE.plat.position.z = pz; setRideSign(ps, L); }
+  // 車内表示
+  const term = termName(L, R.dir);
+  const key = `${R.i}|${stopped}|${G.dozing}`;
+  if (key !== ledKey) {
+    ledKey = key;
+    if (stopped) SND.door();
+    const head = stopped ? `${sn(st[R.i])}` : `つぎは　${sn(st[R.i])}`;
+    const sub = stopped ? (R.i === endIdx(L, R.dir) ? '{終点|しゅうてん}です' : 'ドアが {開|ひら}いています') : `${ln(L)}　${sn(term)} ゆき`;
+    const order = R.dir > 0 ? st : [...st].reverse();
+    const route = order.map(s => { const i = st.indexOf(s); const cls = i === R.i ? (stopped ? 'now' : 'next') : ''; return `<div class="st ${cls}"><div class="dot"></div>${rb(sn(s))}</div>`; }).join('');
+    $('#led').innerHTML = `<div class="big">${rb(head)}</div><div class="sub">${rb(sub)}</div><div class="route" style="--lc:${LN(L).color}">${route}</div>`;
+  }
+  $('#led').hidden = G.dozing;
+}
+function updateHUD() {
+  $('#tNow').textContent = fm(G.t);
+  const showDmg = G.damage + (G.exitT == null ? 0 : 0);
+  $('#mVal').textContent = Math.round(showDmg);
+  const f = $('#mFill'); const pct = Math.min(100, showDmg / CFG.meterMax * 100); f.style.width = pct + '%';
+  f.style.background = pct < 30 ? '#1f9d55' : pct < 60 ? '#e6a700' : '#d8432f';
+  const rate = $('#mRate');
+  let rt, bad = false;
+  if (G.firstTroubleT == null) rt = 'いまは ふえていない';
+  else if (!G.reportedOk) { rt = 'ふえかた：<b>●●● はやい</b><br>（まだ {連絡|れんらく}していない）'; bad = true; }
+  else { const r = CFG.rateByQuality[G.quality]; rt = `ふえかた：${r <= 0.3 ? '● ゆっくり' : r <= 1 ? '●● ふつう' : '●●● はやめ'}（{連絡|れんらく}ずみ）`; }
+  const key = rt; if (rate.dataset.k !== key) { rate.dataset.k = key; rate.innerHTML = rb(rt); rate.className = bad ? 'bad' : ''; }
+  $('#btnFF').classList.toggle('on', G.ff);
+  // ボタン
+  const act = $('#btnAct'); let a = null;
+  if (G.phase === 'station' && !paused()) {
+    const tr = nearTrain(); if (tr) a = ['board', 'のる'];
+    else if (nearStaff()) a = ['ask', 'きく'];
+  } else if (G.phase === 'ride' && !G.dozing) {
+    const R = G.ride; const arr = arrT(R.L, R.dir, R.k, R.i);
+    if (G.t >= arr && G.t < arr + CFG.dwellMin && R.i !== endIdx(R.L, R.dir)) a = ['alight', 'おりる'];
+  }
+  if (a) { if (act.dataset.k !== a[0]) { act.dataset.k = a[0]; act.className = a[0]; act.textContent = a[1]; } act.hidden = false; }
+  else { act.hidden = true; act.dataset.k = ''; }
+  $('#joy').style.visibility = G.phase === 'station' ? 'visible' : 'hidden';
+}
+$('#btnAct').onclick = () => doAction();
+function doAction() {
+  const k = $('#btnAct').dataset.k;
+  if (k === 'board') { const tr = nearTrain(); if (tr) board(tr); }
+  else if (k === 'ask') consult();
+  else if (k === 'alight') alight(false);
+}
+
+function updateCamera() {
+  const P = G.P;
+  player.position.set(P.x, P.y, P.z); player.rotation.y = P.face;
+  const c = G.cam, tx = P.x, ty = P.y + 1.6, tz = P.z;
+  const fx = Math.cos(c.yaw), fz = Math.sin(c.yaw);
+  let dist = c.dist, h = Math.sin(c.pitch) * dist;
+  if (P.level === 'lower' && !P.onStair && Math.abs(P.z) < 9) h = Math.min(h, 6.1 - ty);
+  camera.position.set(tx - fx * Math.cos(c.pitch) * dist, ty + h, tz - fz * Math.cos(c.pitch) * dist);
+  camera.lookAt(tx, ty, tz);
+  if (G.guide) {
+    const b = Math.sin(G.elapsed * 4) * 0.3;
+    guideArrow.position.set(G.guide.x, 4.2 + b, G.guide.z);
+    guideArrow2.position.set(G.guide.x2, 9.8 + b, 4);
+  }
+}
+
+/* --- 入力 --- */
+const joy = $('#joy'), knob = $('#knob'); let joyId = null;
+function joySet(e) { const r = joy.getBoundingClientRect(); let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); const m = r.width / 2 - 20; const d = Math.hypot(dx, dy); if (d > m) { dx *= m / d; dy *= m / d; } knob.style.transform = `translate(${dx}px,${dy}px)`; G.input.jx = dx / m; G.input.jy = -dy / m; }
+joy.addEventListener('pointerdown', e => { joyId = e.pointerId; joy.setPointerCapture(e.pointerId); joySet(e); e.preventDefault(); });
+joy.addEventListener('pointermove', e => { if (e.pointerId === joyId) joySet(e); });
+const joyEnd = e => { if (e.pointerId !== joyId) return; joyId = null; G.input.jx = G.input.jy = 0; knob.style.transform = ''; };
+joy.addEventListener('pointerup', joyEnd); joy.addEventListener('pointercancel', joyEnd);
+let dragId = null, dragX = 0, dragY = 0;
+renderer.domElement.addEventListener('pointerdown', e => { dragId = e.pointerId; dragX = e.clientX; dragY = e.clientY; });
+renderer.domElement.addEventListener('pointermove', e => { if (e.pointerId !== dragId) return; G.cam.yaw += (e.clientX - dragX) * 0.008; G.cam.pitch = Math.max(0.08, Math.min(0.95, G.cam.pitch + (e.clientY - dragY) * 0.004)); dragX = e.clientX; dragY = e.clientY; });
+renderer.domElement.addEventListener('pointerup', () => dragId = null);
+renderer.domElement.addEventListener('pointercancel', () => dragId = null);
+const keys = {};
+addEventListener('keydown', e => { keys[e.key] = true; if (e.key === ' ' || e.key === 'Enter') { if (!paused()) doAction(); } });
+addEventListener('keyup', e => { keys[e.key] = false; });
+function keyInput() { if (joyId != null) return; const x = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0), y = (keys.ArrowUp || keys.w ? 1 : 0) - (keys.ArrowDown || keys.s ? 1 : 0); if (x || y || G.input._k) { G.input.jx = x; G.input.jy = y; G.input._k = !!(x || y); } }
+
+/* iPad：拡大・スクロールを止める */
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('touchmove', e => { if (!e.target.closest('.scroll')) e.preventDefault(); }, { passive: false });
+let lastTouch = 0;
+document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouch < 300 && !e.target.closest('input')) e.preventDefault(); lastTouch = now; }, { passive: false });
+addEventListener('pointerdown', () => { try { if (AC && AC.state !== 'running') AC.resume(); } catch (e) {} }, { once: false });
+
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = rideCam.aspect = w / h; camera.updateProjectionMatrix(); rideCam.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+
+/* --- ループ --- */
+let last = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  let dt = (now - last) / 1000; last = now; dt = Math.min(dt, 1 / 30);
+  keyInput();
+  update(dt);
+  if (G.phase === 'title') { G.cam.yaw += dt * 0.08; G.P.x = -2; G.P.z = 0; G.P.y = 7; player.visible = false; }
+  else if (G.phase === 'station') player.visible = true;
+  if (G.phase === 'ride' && G.ride) { updateRideView(dt); }
+  if (G.phase === 'station' || G.phase === 'ride') updateHUD();
+  updateCamera();
+  renderer.render(G.phase === 'ride' ? rideScene : scene, G.phase === 'ride' ? rideCam : camera);
+}
+
+/* =========================================================
+   テスト用フック
+   エンティティは .position ではなく時刻表（G.t と k, 駅index）で動いています。
+   電車の位置は updateTrains() が G.t から毎回計算します。
+   ========================================================= */
+window.__game = {
+  G, CFG, get station() { return station; }, camera, rideCam,
+  get frames() { return G.frames; }, get elapsed() { return G.elapsed; },
+  api: {
+    tick(n = 1, dt = 1 / 60) { for (let i = 0; i < n; i++) { update(dt); if (G.phase === 'ride' && G.ride) updateRideView(dt); } },
+    state: () => ({ phase: G.phase, t: G.t, P: { ...G.P }, ride: G.ride && { ...G.ride }, troubles: G.troubles.slice(), damage: G.damage, reportedOk: G.reportedOk, quality: G.quality, exitT: G.exitT, result: G.result, modals: [...G.modals] }),
+    start(sceneKey = 'school', level = 1) { G.sceneKey = sceneKey; G.level = level; closeOv('ovStart'); startMission(); closeOv('ovPlan'); },
+    joy(x, y) { G.input.jx = x; G.input.jy = y; },
+    teleport(x, z, level = 'lower') { Object.assign(G.P, { x, z, level, onStair: false, y: level === 'upper' ? 7 : 1 }); },
+    action: doAction, board: () => { const tr = nearTrain(); if (tr) board(tr); return !!tr; }, alight: () => alight(false),
+    report(q = 4) { const items = ['name', 'where', 'late', 'plan'].map((k, i) => ({ key: k, ok: i < q, n: 10 })); report(items, false); closeOv('ovReply'); },
+    closeAll() { [...G.modals].forEach(closeOv); },
+    nearTrain, plan: () => G.plan,
+  },
+};
+
+/* --- 起動 --- */
+(async () => {
+  try { await Promise.race([document.fonts.load(`700 40px "BIZ UDPGothic"`), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
+  G.modals.add('ovStart');
+  buildStation('moridai');
+  requestAnimationFrame(frame);
+})();
+</script>
