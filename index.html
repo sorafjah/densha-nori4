@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>電車でおでかけ</title>
+<title>電車でおでかけ４</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
@@ -27,36 +27,18 @@ rt{font-size:.5em;font-weight:400}
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10}
 #hud>*{pointer-events:auto}
-#hud>#clock,#hud>#banner,#hud>#led{pointer-events:none}
-.panel{background:rgba(255,255,255,.94);border-radius:14px;box-shadow:0 3px 12px rgba(20,30,60,.25)}
-#clock{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:10px 14px;width:270px;pointer-events:none}
-#tNow{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
-#tGoal{font-size:15px;margin-top:6px;line-height:1.7}
-.meter{display:flex;align-items:center;gap:8px;margin-top:8px}
-.mlabel{font-size:14px;font-weight:700;white-space:nowrap}
-.mbar{flex:1;height:16px;background:#e3e8f1;border-radius:8px;overflow:hidden}
-.mbar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s,background .3s}
-#mVal{font-size:20px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right}
-#mRate{font-size:13px;margin-top:4px;line-height:1.7;color:var(--muted)}
-#mRate.bad{color:var(--warn);font-weight:700}
-#topright{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:8px}
-.round{width:52px;height:52px;border-radius:50%;border:none;background:#fff;color:var(--navy);font-size:26px;font-weight:700;box-shadow:0 3px 10px rgba(20,30,60,.3)}
-#banner{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(560px,calc(100vw - 600px));min-width:260px;
-  padding:12px 18px;font-size:18px;line-height:1.8;font-weight:700;text-align:center;pointer-events:none}
-#banner.warn{background:#fff3f0;border:3px solid var(--warn)}
-#banner.info{background:#fff;border:3px solid var(--navy2)}
-#banner.call{background:#fffbe8;border:3px solid var(--led)}
-@media (max-width:900px){#banner{max-width:calc(100vw - 24px);top:auto;bottom:calc(220px + env(safe-area-inset-bottom,0px))}}
-#led{position:absolute;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));width:min(720px,calc(100vw - 32px));background:#111;border-radius:12px;padding:10px 16px;color:var(--led);pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
-#led .big{font-size:30px;font-weight:700;text-align:center;line-height:1.6}
-#led .sub{font-size:15px;color:#ffd9a0;text-align:center}
-.route{display:flex;align-items:flex-start;justify-content:space-between;margin-top:8px;position:relative;padding-top:6px}
+#hud>#clock,#hud>#banner,#hud>#led{position:absolute;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:min(640px,calc(100vw - 300px));background:rgba(255,255,255,.94);border-radius:14px;border-top:8px solid var(--lc,#2f6fd6);padding:8px 16px 10px;color:var(--navy);pointer-events:none;box-shadow:0 3px 12px rgba(20,30,60,.25)}
+#led .big{font-size:28px;font-weight:700;text-align:center;line-height:1.6}
+#led .sub{font-size:15px;color:var(--muted);text-align:center}
+.route{display:flex;align-items:flex-start;justify-content:space-between;margin-top:6px;position:relative;padding-top:6px}
 .route::before{content:"";position:absolute;left:4%;right:4%;top:14px;height:4px;background:var(--lc,#888);border-radius:2px}
-.route .st{flex:1;text-align:center;font-size:13px;color:#ddd;position:relative;line-height:1.5}
-.route .st .dot{width:16px;height:16px;border-radius:50%;background:#333;border:3px solid var(--lc,#888);margin:0 auto 4px}
-.route .st.now .dot{background:var(--led);border-color:var(--led);box-shadow:0 0 10px var(--led)}
-.route .st.now{color:var(--led);font-weight:700}
-.route .st.next .dot{background:#fff}
+.route .st{flex:1;text-align:center;font-size:13px;color:var(--muted);position:relative;line-height:1.5}
+.route .st .dot{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--lc,#888);margin:0 auto 4px}
+.route .st.now .dot{background:var(--led);border-color:var(--navy);transform:scale(1.25)}
+.route .st.now{color:var(--navy);font-weight:700}
+.route .st.next .dot{background:var(--lc,#888)}
+.route .st.next{color:var(--navy);font-weight:700}
+@media (max-width:760px){#led{width:calc(100vw - 32px);bottom:calc(200px + env(safe-area-inset-bottom,0px))}}
 #joy{position:absolute;left:calc(24px + env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.35);border:3px solid rgba(255,255,255,.8);touch-action:none}
 #knob{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 #rbtns{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:12px}
@@ -143,9 +125,9 @@ rt{font-size:.5em;font-weight:400}
   }
 }
 </script>
-<!-- build: 2026-10-10 -->
+<!-- build: 2026-10-10b -->
 <div id="stage"></div>
-<div id="ver">v2026-10-10</div>
+<div id="ver">v2026-10-10b</div>
 
 <div id="hud" hidden>
   <div id="clock" class="panel">
@@ -174,7 +156,7 @@ rt{font-size:.5em;font-weight:400}
   <div class="card scroll">
     <div class="titlebar">
       <div class="lines"><i style="background:var(--ao)"></i><i style="background:var(--midori)"></i></div>
-      <div><h1><ruby>電車<rt>でんしゃ</rt></ruby>でおでかけ</h1>
+      <div><h1><ruby>電車<rt>でんしゃ</rt></ruby>でおでかけ４</h1>
       <div style="font-size:17px"><ruby>乗<rt>の</rt></ruby>りかえ<ruby>案内<rt>あんない</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、<ruby>駅<rt>えき</rt></ruby>を<ruby>進<rt>すす</rt></ruby>もう。こまったら、すぐ<ruby>連絡<rt>れんらく</rt></ruby>・<ruby>相談<rt>そうだん</rt></ruby>。</div></div>
     </div>
     <h3>どこへ<ruby>行<rt>い</rt></ruby>く？</h3>
@@ -279,7 +261,7 @@ import * as THREE from 'three';
    設定（数値はここだけ直せば変わります）
    ========================================================= */
 const CFG = {
-  version: 'v2026-10-10',
+  version: 'v2026-10-10b',
   timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
   ffScale: 4,            // 「はやおくり」中の倍率
   headway: 5,            // 電車の間隔（分）
@@ -373,7 +355,7 @@ const targetIdx = (L) => L === destLine() ? idxOf(G.mission.to, L) : idxOf(TRANS
 const G = {
   phase: 'title', t: 0, frames: 0, elapsed: 0, ff: false,
   sceneKey: 'school', level: 1, mission: null, plan: null,
-  P: { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2 },
+  P: { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2, vx: 0, vz: 0, spd: 0, walk: 0 },
   cam: { yaw: 0, pitch: 0.36, dist: 7.5 },
   ride: null, lastAlight: null, troubles: [], onPlan: true, legIdx: 0,
   firstTroubleT: null, lastTroubleT: null, reportedOk: false, quality: 0, reports: [], damage: 0,
@@ -423,17 +405,33 @@ function nameKana(g, name, kana, x, y, size, color = '#fff', kcolor) {
 }
 function fitText(g, s, x, y, maxW) { const w = g.measureText(s).width; if (w > maxW) { g.save(); g.translate(x, y); g.scale(maxW / w, 1); g.fillText(s, 0, 0); g.restore(); } else g.fillText(s, x, y); }
 function disposeGroup(g) {
-  g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.userData.temp) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
+  g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !Array.isArray(o.material) && o.material.userData.temp) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
 }
 function makePerson(color, opt = {}) {
-  const g = new THREE.Group();
-  box(0.7, 0.9, 0.45, color, 0, 0.95, 0, g);
-  box(0.3, 0.55, 0.3, opt.leg || '#333a48', -0.18, 0.28, 0, g); box(0.3, 0.55, 0.3, opt.leg || '#333a48', 0.18, 0.28, 0, g);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 10), M('#f2cfa8')); head.position.y = 1.68; g.add(head);
-  if (opt.cap) { box(0.62, 0.16, 0.62, '#1b2a4a', 0, 1.92, 0, g); box(0.62, 0.05, 0.3, '#1b2a4a', 0, 1.85, 0.3, g); box(0.2, 0.08, 0.05, '#ffb020', 0, 1.93, 0.32, g); }
-  else box(0.6, 0.18, 0.58, opt.hair || '#2b2420', 0, 1.88, -0.03, g);
-  if (opt.bag) box(0.55, 0.6, 0.25, opt.bag, 0, 1.05, -0.33, g);
+  const g = new THREE.Group(); const legC = opt.leg || '#333a48';
+  box(0.62, 0.8, 0.4, color, 0, 1.08, 0, g);
+  const limb = (x, y, w, h, c, hand) => { const p = new THREE.Group(); p.position.set(x, y, 0); box(w, h, w, c, 0, -h / 2, 0, p);
+    if (hand) { const hd = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), M('#f2cfa8')); hd.position.y = -h - 0.05; p.add(hd); }
+    else box(w + 0.04, 0.12, w + 0.12, '#2a2a30', 0, -h + 0.06, 0.04, p);
+    g.add(p); return p; };
+  const legL = limb(-0.16, 0.68, 0.24, 0.66, legC), legR = limb(0.16, 0.68, 0.24, 0.66, legC);
+  const armL = limb(-0.41, 1.44, 0.17, 0.6, color, true), armR = limb(0.41, 1.44, 0.17, 0.6, color, true);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.27, 18, 14), M('#f2cfa8')); head.position.y = 1.74; g.add(head);
+  if (opt.cap) {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.29, 0.3, 0.17, 18), M('#1b2a4a')); c.position.y = 1.95; g.add(c);
+    const br = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 16, 1, false, -Math.PI / 2, Math.PI), M('#1b2a4a')); br.position.set(0, 1.88, 0.2); g.add(br);
+    box(0.16, 0.07, 0.03, '#ffb020', 0, 1.97, 0.29, g);
+  } else {
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.295, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.52), M(opt.hair || '#2b2420'));
+    hair.position.set(0, 1.76, -0.02); hair.rotation.x = -0.35; g.add(hair);
+  }
+  if (opt.bag) box(0.5, 0.56, 0.22, opt.bag, 0, 1.1, -0.31, g);
+  g.userData.limbs = { legL, legR, armL, armR };
   return g;
+}
+function animPerson(p, phase, amt) {
+  const L = p.userData.limbs; if (!L) return; const sw = Math.sin(phase) * 0.65 * amt;
+  L.legL.rotation.x = sw; L.legR.rotation.x = -sw; L.armL.rotation.x = -sw * 0.8; L.armR.rotation.x = sw * 0.8;
 }
 
 /* プレイヤー */
@@ -446,9 +444,28 @@ guideArrow.visible = false; scene.add(guideArrow);
 const guideArrow2 = guideArrow.clone(); guideArrow2.visible = false; scene.add(guideArrow2);
 
 /* ---------- 駅をつくる ---------- */
+const stairY = z => 7 - Math.min(1, Math.max(0, (z - 6) / 12)) * 6; // 階段の高さ（見た目と歩く高さで同じ式を使う）
 let station = null;
-const winTex = canvasTex(128, 256, (g, w, h) => { g.fillStyle = '#c9ccd3'; g.fillRect(0, 0, w, h); g.fillStyle = '#5d7393'; for (let y = 10; y < h; y += 30) for (let x = 10; x < w; x += 30) g.fillRect(x, y, 18, 18); });
+const winTex = canvasTex(128, 128, (g, w, h) => { g.fillStyle = '#c9ccd3'; g.fillRect(0, 0, w, h); g.fillStyle = '#5d7393'; g.fillRect(28, 34, 72, 60); g.fillStyle = '#8fa6c4'; g.fillRect(32, 38, 30, 52); });
+winTex.wrapS = winTex.wrapT = THREE.RepeatWrapping;
 const winMat = new THREE.MeshLambertMaterial({ map: winTex });
+const BLD_FLOOR = 3;
+function scaledBox(w, h, d) {
+  const geo = new THREE.BoxGeometry(w, h, d); const uv = geo.attributes.uv;
+  const dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+  for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * Math.max(1, Math.round(dims[f][0] / 3.2)), uv.getY(i) * Math.max(1, Math.round(dims[f][1] / BLD_FLOOR))); }
+  return geo;
+}
+const SHOP = ['#b98a5e', '#8e9b6e', '#a96e6e', '#7d8fa8', '#b0a27c'];
+function building(parent, x, z, w, h, n) {
+  const b = new THREE.Group(); b.position.set(x, 0, z);
+  box(w, BLD_FLOOR, w, SHOP[n % SHOP.length], 0, BLD_FLOOR / 2, 0, b);
+  box(w + 0.6, 0.25, w + 0.6, '#e4e1da', 0, BLD_FLOOR, 0, b);
+  const up = Math.max(BLD_FLOOR, Math.round((h - BLD_FLOOR) / BLD_FLOOR) * BLD_FLOOR);
+  const m = new THREE.Mesh(scaledBox(w, up, w), [winMat, winMat, M('#a9adb6'), M('#a9adb6'), winMat, winMat]);
+  m.position.y = BLD_FLOOR + up / 2; b.add(m);
+  parent.add(b); return b;
+}
 
 function trackSignTex(L, dir, num, s, arrowRight) {
   const term = termName(L, dir); const col = LN(L).color;
@@ -508,7 +525,7 @@ function signTex(lines, bg = '#1b2a4a') {
 
 function makeTrain(L, dir, pside) {
   const g = new THREE.Group(); const lm = M(LN(L).color);
-  const doors = [], lights = [];
+  const doors = [];
   const term = termName(L, dir);
   const ledTex = canvasTex(512, 96, (c, w, h) => { c.fillStyle = '#111'; c.fillRect(0, 0, w, h); c.fillStyle = '#ffb020'; c.textAlign = 'center'; c.font = `700 46px ${FONT}`; fitText(c, SET.stations[term].name + ' ゆき', w / 2, 56, w - 20); c.font = `400 20px ${FONT}`; c.fillText(SET.stations[term].kana, w / 2, 86); });
   for (const cz of [-20, 0, 20]) {
@@ -517,19 +534,27 @@ function makeTrain(L, dir, pside) {
     box(3.02, 0.9, 19, '#2d3b52', 0, 3.1, cz, g);
     box(2.6, 0.6, 18, '#2a2d33', 0, 0.6, cz, g);
     for (const dz of [-6, 0, 6]) {
-      doors.push(box(0.08, 2.3, 1.5, '#b9bec8', pside * 1.55, 2.25, cz + dz, g));
-      const l = box(0.06, 2.3, 1.5, '#ffe7a3', pside * 1.53, 2.25, cz + dz, g); l.visible = false; lights.push(l);
-      box(0.08, 2.3, 1.5, '#b9bec8', -pside * 1.55, 2.25, cz + dz, g);
+      const zc = cz + dz;
+      const l = box(0.08, 2.3, 0.75, '#b9bec8', pside * 1.56, 2.25, zc - 0.375, g), r = box(0.08, 2.3, 0.75, '#b9bec8', pside * 1.56, 2.25, zc + 0.375, g);
+      doors.push({ l, r, zc });
+      box(0.04, 2.3, 1.5, '#ffe7a3', pside * 1.52, 2.25, zc, g);
+      box(0.08, 2.3, 1.5, '#b9bec8', -pside * 1.55, 2.25, zc, g);
     }
     plane(ledTex, 2.4, 0.45, g, pside * 1.58, 3.95, cz - 3, pside > 0 ? Math.PI / 2 : -Math.PI / 2);
   }
-  g.userData = { doors, lights, open: false };
+  g.userData = { doors, p: 0, target: 0 };
   return g;
 }
-function setDoors(tr, open) { if (tr.userData.open === open) return; tr.userData.open = open; tr.userData.doors.forEach(d => d.visible = !open); tr.userData.lights.forEach(d => d.visible = open); }
+function setDoors(tr, open) { tr.userData.target = open ? 1 : 0; }
+function animDoors(ud, dt) {
+  if (ud.p === ud.target) return;
+  ud.p = ud.target > ud.p ? Math.min(1, ud.p + dt / 0.8) : Math.max(0, ud.p - dt / 0.8);
+  const e = ud.p * ud.p * (3 - 2 * ud.p) * 0.72;
+  for (const d of ud.doors) { d.l.position.z = d.zc - 0.375 - e; d.r.position.z = d.zc + 0.375 + e; }
+}
 
 function buildStation(sId) {
-  if (station) { scene.remove(station.group); disposeGroup(station.group); }
+  if (station) { unfadeAll(); scene.remove(station.group); disposeGroup(station.group); }
   const g = new THREE.Group(); scene.add(g);
   const st = { id: sId, group: g, lines: [], tracks: [], staff: [], boards: [], upper: [], lower: [], stairs: [] };
   const ls = linesAt(sId);
@@ -540,7 +565,7 @@ function buildStation(sId) {
   for (let i = 0; i < 36; i++) {
     const side = i % 2 ? 1 : -1; const x = side < 0 ? -30 - rnd() * 50 : xmax + 20 + rnd() * 50;
     const h = 6 + rnd() * 22, w = 8 + rnd() * 8; const z = -160 + (i / 36) * 320 + rnd() * 6;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), winMat); b.position.set(x, h / 2, z); g.add(b);
+    building(g, x, z, w, h, i);
   }
   ls.forEach((L, o) => {
     const cx = o * 20, idx = idxOf(sId, L);
@@ -548,7 +573,8 @@ function buildStation(sId) {
     box(6, 1, 90, '#cfcabe', cx, 0.5, 0, g);
     box(0.35, 0.02, 90, '#f2c21a', cx - 2.35, 1.01, 0, g); box(0.35, 0.02, 90, '#f2c21a', cx + 2.35, 1.01, 0, g);
     // 屋根と柱
-    for (const [z0, z1] of [[-45, -6], [6, 45]]) { box(7, 0.25, z1 - z0, '#dfe3ea', cx, 5.9, (z0 + z1) / 2, g); for (let z = z0 + 4; z < z1; z += 10) box(0.3, 4.9, 0.3, '#8c95a6', cx, 3.45, z, g); }
+    for (const [x0, x1] of [[cx - 3.5, cx - 1.7], [cx + 1.7, cx + 3.5]]) box(x1 - x0, 0.25, 12.6, '#dfe3ea', (x0 + x1) / 2, 5.9, 12.3, g);
+    for (const [z0, z1] of [[-45, -6], [18.6, 45]]) { box(7, 0.25, z1 - z0, '#dfe3ea', cx, 5.9, (z0 + z1) / 2, g); for (let z = z0 + 4; z < z1; z += 10) box(0.3, 4.9, 0.3, '#8c95a6', cx, 3.45, z, g); }
     for (const dir of [-1, 1]) {
       const x = cx + dir * 5; const num = trackNum(sId, L, dir);
       box(3.4, 0.25, 400, '#7d766d', x, 0.05, 0, g);
@@ -567,8 +593,9 @@ function buildStation(sId) {
     for (const f of [1, -1]) plane(nameBoardTex(sId, L, f < 0), 4.8, 1.8, g, cx + f * 0.06, 2.4, 34, f > 0 ? Math.PI / 2 : -Math.PI / 2);
     for (const f of [1, -1]) box(0.1, 1.9, 4.9, '#8c95a6', cx, 2.4, 34, g);
     // 階段
-    const ramp = box(3, 0.3, 13.4, '#bfc4cc', cx, 4, 12, g); ramp.rotation.x = Math.atan2(6, 12);
-    for (let i = 0; i < 12; i++) box(3, 0.08, 0.15, '#8f96a3', cx, 7 - i * 0.5 + 0.12, 6.5 + i, g);
+    const sa = Math.atan2(6, 12);
+    const ramp = box(3, 0.3, 13.6, '#bfc4cc', cx, 4 - 0.15 / Math.cos(sa), 12, g); ramp.rotation.x = sa;
+    for (let i = 0; i < 24; i++) { const z = 6.25 + i * 0.5; const st = box(3, 0.05, 0.22, i % 2 ? '#a9b0bb' : '#8f96a3', cx, stairY(z) + 0.02, z, g); st.rotation.x = sa; }
     box(0.15, 1.1, 13.4, '#8c95a6', cx - 1.55, 4.6, 12, g).rotation.x = Math.atan2(6, 12);
     box(0.15, 1.1, 13.4, '#8c95a6', cx + 1.55, 4.6, 12, g).rotation.x = Math.atan2(6, 12);
     // 動ける場所（下：ホーム）
@@ -610,8 +637,12 @@ const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, 
 {
   const g = rideScene;
   box(3.4, 0.1, 30, '#c7b9a2', 0, 1, 0, g); box(3.4, 0.1, 30, '#f4f4f2', 0, 4.0, 0, g);
-  box(0.1, 1.05, 30, '#e7e9ee', 1.65, 1.5, 0, g); box(0.1, 0.55, 30, '#e7e9ee', 1.65, 3.75, 0, g);
-  for (const z of [-12, -6, 0, 6, 12]) box(0.1, 1.5, 0.7, '#e7e9ee', 1.65, 2.75, z, g);
+  box(0.1, 1.05, 14.2, '#e7e9ee', 1.65, 1.5, -7.9, g); box(0.1, 1.05, 14.2, '#e7e9ee', 1.65, 1.5, 7.9, g); box(0.1, 0.55, 30, '#e7e9ee', 1.65, 3.75, 0, g);
+  for (const z of [-12, -6, 6, 12]) box(0.1, 1.5, 0.7, '#e7e9ee', 1.65, 2.75, z, g);
+  for (const z of [-0.95, 0.95]) box(0.14, 2.45, 0.3, '#c9ced6', 1.66, 2.25, z, g);
+  // 車内のドア（駅に着くと開く）
+  const dpan = z => { const d = new THREE.Group(); d.position.set(1.62, 2.22, z); box(0.07, 2.35, 0.8, '#c3c8d0', 0, 0, 0, d); box(0.08, 0.85, 0.5, '#5d7393', 0, 0.45, 0, d); g.add(d); return d; };
+  RIDE.door = { l: dpan(-0.4), r: dpan(0.4), p: 0 };
   box(0.1, 3, 30, '#e7e9ee', -1.7, 2.5, 0, g);
   box(0.7, 0.45, 26, '#4f6fa8', 1.25, 1.35, 0, g); box(0.15, 0.6, 26, '#4f6fa8', 1.55, 1.75, 0, g);
   for (const z of [-9, -3, 3, 9]) box(0.08, 3, 0.08, '#c9ced6', 0.9, 2.5, z, g);
@@ -619,7 +650,7 @@ const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, 
   [['#6d8fb8', -4.5], ['#c46b6b', 2.2], ['#7fae7a', 6.8]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.15, 0.65, z); p.rotation.y = -Math.PI / 2; p.scale.setScalar(1); g.add(p); });
   box(400, 0.2, 400, '#9aa58e', 0, -0.4, 0, g);
   let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 40; i++) { const h = 3 + rnd() * 16, w = 4 + rnd() * 6; const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), winMat); const z0 = -150 + i * 7.5; b.position.set(10 + rnd() * 40, h / 2, z0); b.userData.z0 = z0; g.add(b); RIDE.outside.push(b); }
+  for (let i = 0; i < 40; i++) { const h = 3 + rnd() * 16, w = 4 + rnd() * 6; const z0 = -150 + i * 7.5; const b = building(g, 10 + rnd() * 40, z0, w, h + 3, i); b.position.y = -0.3; b.userData.z0 = z0; RIDE.outside.push(b); }
   for (let i = 0; i < 24; i++) { const p = box(0.2, 5, 0.2, '#666b75', 4.5, 2.5, 0, g); p.userData.z0 = -150 + i * 12.5; RIDE.outside.push(p); }
   box(5, 1, 60, '#cfcabe', 5.2, 0.5, 0, RIDE.plat); box(0.35, 0.02, 60, '#f2c21a', 3.2, 1.01, 0, RIDE.plat);
   for (let z = -24; z <= 24; z += 12) box(0.3, 4, 0.3, '#8c95a6', 6.5, 3, z, RIDE.plat);
@@ -888,7 +919,7 @@ function startMission() {
     G.delayTrigger = arrT(leg.L, leg.dir, leg.k - 1, leg.i, true) - 2;
   }
   buildStation(m.from);
-  Object.assign(G.P, { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2 });
+  Object.assign(G.P, { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2, vx: 0, vz: 0, spd: 0 });
   G.cam.yaw = 0; G.phase = 'station';
   $('#hud').hidden = false; $('#led').hidden = true; $('#banner').hidden = true; $('#btnPhone').classList.remove('ring');
   $('#tGoal').innerHTML = rb(`${fm(G.plan.deadline)}までに ${sn(m.to)}{駅|えき}の{改札|かいさつ}を{出|で}る`);
@@ -939,7 +970,7 @@ function moveTo(nx, nz) {
     } else SND.gate();
   }
   P.x = nx; P.z = nz;
-  if (res.stair) { P.onStair = true; P.y = 7 - Math.min(1, Math.max(0, (nz - 6) / 12)) * 6; if (nz < 6.1) P.level = 'upper'; else if (nz > 17.9) P.level = 'lower'; }
+  if (res.stair) { P.onStair = true; P.y = stairY(nz); if (nz < 6.1) P.level = 'upper'; else if (nz > 17.9) P.level = 'lower'; }
   else { P.onStair = false; P.level = res.level; P.y = res.level === 'upper' ? 7 : 1; }
 }
 
@@ -960,6 +991,9 @@ function updateTrains() {
     }
     tr.train.visible = !!tr.cur;
     if (tr.cur) { tr.train.position.z = tr.cur.z; setDoors(tr.train, tr.cur.open); }
+    const op = !!(tr.cur && tr.cur.open);
+    if (op && !tr.wasOpen && G.P.level === 'lower' && Math.abs(G.P.x - tr.x) < 8) SND.door();
+    tr.wasOpen = op;
   }
 }
 function nearTrain() {
@@ -995,7 +1029,7 @@ function alight(forced) {
 function enterStationFromTrain(s, L, dir) {
   buildStation(s); station.group.visible = true; player.visible = true;
   const tr = station.tracks.find(t => t.L === L && t.dir === dir);
-  Object.assign(G.P, { x: tr.cx + dir * 2.3, y: 1, z: -8, level: 'lower', onStair: false, face: dir > 0 ? -Math.PI / 2 : Math.PI / 2 });
+  Object.assign(G.P, { x: tr.cx + dir * 2.3, y: 1, z: -8, level: 'lower', onStair: false, face: dir > 0 ? -Math.PI / 2 : Math.PI / 2, vx: 0, vz: 0, spd: 0 });
   G.cam.yaw = Math.PI / 2; G.phase = 'station'; $('#led').hidden = true;
   updateTrains();
 }
@@ -1052,14 +1086,23 @@ function update(dtReal) {
     // 手前でおりた電車が出ていった
     if (G.lastAlight) { const a = G.lastAlight; if (G.t >= depT(a.L, a.dir, a.k, a.i)) { G.lastAlight = null; trouble('early'); } }
     const P = G.P, { jx, jy } = G.input; const mag = Math.min(1, Math.hypot(jx, jy));
+    let tvx = 0, tvz = 0;
     if (mag > 0.08) {
       const y = G.cam.yaw, fx = Math.cos(y), fz = Math.sin(y);
       const vx = fx * jy - fz * jx, vz = fz * jy + fx * jx; const n = Math.hypot(vx, vz) || 1;
-      const sp = CFG.walkSpeed * mag * dtScale / 60;
-      P.face = Math.atan2(vx, vz);
-      moveTo(P.x + vx / n * sp, P.z + vz / n * sp);
-      if (G.phase !== 'station') return;
+      tvx = vx / n * CFG.walkSpeed * mag; tvz = vz / n * CFG.walkSpeed * mag;
     }
+    const k = Math.min(1, dtReal * 9);
+    P.vx += (tvx - P.vx) * k; P.vz += (tvz - P.vz) * k;
+    const spd = Math.hypot(P.vx, P.vz); P.spd = spd;
+    if (spd > 0.05) {
+      const ox = P.x, oz = P.z;
+      moveTo(P.x + P.vx * dtReal, P.z + P.vz * dtReal);
+      if (G.phase !== 'station') return;
+      if (Math.abs(P.x - ox) < 1e-6) P.vx *= 0.5; if (Math.abs(P.z - oz) < 1e-6) P.vz *= 0.5;
+      if (mag > 0.08) { let d = Math.atan2(P.vx, P.vz) - P.face; d = Math.atan2(Math.sin(d), Math.cos(d)); P.face += d * Math.min(1, dtReal * 12); }
+    }
+    P.walk += spd * dtReal * 2.3;
     updateTrains();
     if (Math.floor(G.t * 2) !== station.lastBoard) { station.lastBoard = Math.floor(G.t * 2); station.boards.forEach(redraw); }
   } else if (G.phase === 'ride') {
@@ -1100,6 +1143,9 @@ function updateRideView(dtReal) {
   if (stopped) { pz = 0; ps = st[R.i]; }
   else if (hasPrev && G.t - depPrev < 0.35) { pz = -Math.pow((G.t - depPrev) / 0.35, 2) * 70; ps = st[prevI]; }
   else if (arr - G.t < 0.35) { pz = Math.pow((arr - G.t) / 0.35, 2) * 70; ps = st[R.i]; }
+  const dt = RIDE.door, tg = stopped && !G.dozing ? 1 : 0;
+  dt.p = tg > dt.p ? Math.min(1, dt.p + dtReal / 0.8) : Math.max(0, dt.p - dtReal / 0.8);
+  const e = dt.p * dt.p * (3 - 2 * dt.p) * 0.75; dt.l.position.z = -0.4 - e; dt.r.position.z = 0.4 + e;
   RIDE.plat.visible = pz != null; if (ps) { RIDE.plat.position.z = pz; setRideSign(ps, L); }
   // 車内表示
   const term = termName(L, R.dir);
@@ -1111,6 +1157,7 @@ function updateRideView(dtReal) {
     const sub = stopped ? (R.i === endIdx(L, R.dir) ? '{終点|しゅうてん}です' : 'ドアが {開|ひら}いています') : `${ln(L)}　${sn(term)} ゆき`;
     const order = R.dir > 0 ? st : [...st].reverse();
     const route = order.map(s => { const i = st.indexOf(s); const cls = i === R.i ? (stopped ? 'now' : 'next') : ''; return `<div class="st ${cls}"><div class="dot"></div>${rb(sn(s))}</div>`; }).join('');
+    $('#led').style.setProperty('--lc', LN(L).color);
     $('#led').innerHTML = `<div class="big">${rb(head)}</div><div class="sub">${rb(sub)}</div><div class="route" style="--lc:${LN(L).color}">${route}</div>`;
   }
   $('#led').hidden = G.dozing;
@@ -1151,17 +1198,38 @@ function doAction() {
 
 function updateCamera() {
   const P = G.P;
-  player.position.set(P.x, P.y, P.z); player.rotation.y = P.face;
+  const amt = Math.min(1, (P.spd || 0) / CFG.walkSpeed);
+  player.position.set(P.x, P.y + Math.abs(Math.sin(P.walk || 0)) * 0.07 * amt, P.z); player.rotation.y = P.face;
+  animPerson(player, P.walk || 0, amt);
   const c = G.cam, tx = P.x, ty = P.y + 1.6, tz = P.z;
   const fx = Math.cos(c.yaw), fz = Math.sin(c.yaw);
   let dist = c.dist, h = Math.sin(c.pitch) * dist;
-  if (P.level === 'lower' && !P.onStair && Math.abs(P.z) < 9) h = Math.min(h, 6.1 - ty);
   camera.position.set(tx - fx * Math.cos(c.pitch) * dist, ty + h, tz - fz * Math.cos(c.pitch) * dist);
   camera.lookAt(tx, ty, tz);
   if (G.guide) {
     const b = Math.sin(G.elapsed * 4) * 0.3;
     guideArrow.position.set(G.guide.x, 4.2 + b, G.guide.z);
     guideArrow2.position.set(G.guide.x2, 9.8 + b, 4);
+  }
+}
+
+/* --- カメラと自分のあいだの物をうすくする --- */
+const ray = new THREE.Raycaster(); const faded = new Set(); const fadeCache = new Map();
+const _v = new THREE.Vector3();
+function fadeOf(m) { let f = fadeCache.get(m.uuid); if (!f) { f = m.clone(); f.transparent = true; f.opacity = 0.2; f.depthWrite = false; f.userData = {}; fadeCache.set(m.uuid, f); } return f; }
+function unfadeAll() { for (const o of faded) o.material = o.userData.origMat; faded.clear(); }
+function updateOcclusion() {
+  unfadeAll();
+  if (G.phase !== 'station' || !station) return;
+  for (const hy of [0.4, 1.0, 1.8]) {
+    _v.set(G.P.x, G.P.y + hy, G.P.z).sub(camera.position); const dist = _v.length();
+    ray.set(camera.position, _v.normalize()); ray.far = dist - 0.3;
+    for (const h of ray.intersectObjects(station.group.children, true)) {
+      const o = h.object; if (!o.isMesh || faded.has(o)) continue;
+      o.userData.origMat = o.material;
+      o.material = Array.isArray(o.material) ? o.material.map(fadeOf) : fadeOf(o.material);
+      faded.add(o);
+    }
   }
 }
 
@@ -1204,6 +1272,8 @@ function frame(now) {
   if (G.phase === 'ride' && G.ride) { updateRideView(dt); }
   if (G.phase === 'station' || G.phase === 'ride') updateHUD();
   updateCamera();
+  if (station) for (const tr of station.tracks) animDoors(tr.train.userData, dt);
+  updateOcclusion();
   renderer.render(G.phase === 'ride' ? rideScene : scene, G.phase === 'ride' ? rideCam : camera);
 }
 
