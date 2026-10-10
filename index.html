@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>電車でおでかけ４</title>
+<title>電車の乗り降り４</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
@@ -30,6 +30,8 @@ rt{font-size:.5em;font-weight:400}
 #hud>#clock,#hud>#banner,#hud>#led{pointer-events:none}
 .panel{background:rgba(255,255,255,.94);border-radius:14px;box-shadow:0 3px 12px rgba(20,30,60,.25)}
 #clock{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 16px 10px;min-width:220px;max-width:300px}
+#clock .clockrow{display:flex;align-items:center;gap:12px}
+#ana{width:72px;height:72px;flex:0 0 72px}
 #clock .nowlab{font-size:15px;font-weight:700;color:var(--muted)}
 #tNow{font-size:44px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
 #tGoal{font-size:15px;margin-top:4px;line-height:1.7}
@@ -131,14 +133,14 @@ rt{font-size:.5em;font-weight:400}
   }
 }
 </script>
-<!-- build: 2026-10-10d -->
+<!-- build: 2026-10-10e -->
 <div id="stage"></div>
-<div id="ver">v2026-10-10d</div>
+<div id="ver">v2026-10-10e</div>
 
 <div id="hud" hidden>
   <div id="clock" class="panel">
     <div class="nowlab">いまの <ruby>時刻<rt>じこく</rt></ruby></div>
-    <div id="tNow">7:41</div>
+    <div class="clockrow"><svg id="ana" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#1b2a4a" stroke-width="5"/><g id="anaTicks"></g><line id="hHand" x1="50" y1="50" x2="50" y2="27" stroke="#1b2a4a" stroke-width="7" stroke-linecap="round"/><line id="mHand" x1="50" y1="50" x2="50" y2="14" stroke="#d8432f" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="50" r="5" fill="#1b2a4a"/></svg><div id="tNow">7:41</div></div>
     <div id="tGoal"></div>
   </div>
   <div id="topright"><button id="btnHelp" class="round" aria-label="あそびかた">？</button></div>
@@ -149,7 +151,7 @@ rt{font-size:.5em;font-weight:400}
     <button id="btnAct" hidden></button>
     <div class="row">
       <button id="btnFF" class="sbtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>はやおくり</button>
-      <button id="btnPlan" class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span><ruby>案内<rt>あんない</rt></ruby></span></button>
+      <button id="btnPlan" class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>やること</span></button>
       <button id="btnPhone" class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg><span><ruby>連絡<rt>れんらく</rt></ruby></span></button>
     </div>
   </div>
@@ -161,7 +163,7 @@ rt{font-size:.5em;font-weight:400}
   <div class="card scroll">
     <div class="titlebar">
       <div class="lines"><i style="background:var(--ao)"></i><i style="background:var(--midori)"></i></div>
-      <div><h1><ruby>電車<rt>でんしゃ</rt></ruby>でおでかけ４</h1>
+      <div><h1><ruby>電車<rt>でんしゃ</rt></ruby>の<ruby>乗<rt>の</rt></ruby>り<ruby>降<rt>お</rt></ruby>り４</h1>
       <div style="font-size:17px"><ruby>乗<rt>の</rt></ruby>りかえ<ruby>案内<rt>あんない</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、<ruby>駅<rt>えき</rt></ruby>を<ruby>進<rt>すす</rt></ruby>もう。こまったら、すぐ<ruby>連絡<rt>れんらく</rt></ruby>・<ruby>相談<rt>そうだん</rt></ruby>。</div></div>
     </div>
     <h3>どこへ<ruby>行<rt>い</rt></ruby>く？</h3>
@@ -268,7 +270,7 @@ import * as THREE from 'three';
    設定（数値はここだけ直せば変わります）
    ========================================================= */
 const CFG = {
-  version: 'v2026-10-10d',
+  version: 'v2026-10-10e',
   timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
   ffScale: 4,            // 「はやおくり」中の倍率
   headway: 5,            // 電車の間隔（分）
@@ -291,7 +293,7 @@ const CFG = {
   meterMax: 60,
   lines: {
     ao:     { name: '東西線',   kana: 'とうざいせん',   color: '#2f6fd6', stations: ['yamate','moridai','kawabe','chuo','sakura','minato','umibe'] },
-    midori: { name: '南北線',   kana: 'なんぼくせん', color: '#21a05f', stations: ['higashi','chuo','hoshi','hanazono','kitamori'] },
+    midori: { name: '南北線',   kana: 'なんぼくせん', color: '#21a05f', stations: ['higashi','chuo','hoshi','hanazono','kitamori','fujimi'] },
   },
   stations: {
     yamate:   { name: '山手',     kana: 'やまて' },
@@ -305,17 +307,19 @@ const CFG = {
     hoshi:    { name: 'ほしの丘', kana: 'ほしのおか' },
     hanazono: { name: '花園',     kana: 'はなぞの' },
     kitamori: { name: '北の森',   kana: 'きたのもり' },
+    fujimi:   { name: 'ふじみ野', kana: 'ふじみの' },
   },
   people: {
     school: '○○中学校', player: '',
     teacher: { name: '山田先生', kana: 'やまだせんせい' },
     boss:    { name: '佐藤さん', kana: 'さとうさん' },
   },
+  // 出発時刻のはば（毎回この中からランダム）
+  startBase: { school: 7*60+34, work: 8*60+10 }, startSpread: 10,
+  delayChoices: [10, 12, 15],   // 遅れる分数（ランダム）
   scenes: {
-    school: { missions: { 1: { from: 'moridai', to: 'sakura', start: 7*60+41 }, 2: { from: 'moridai', to: 'hoshi', start: 7*60+41 } } },
-    work:   { missions: { 1: { from: 'moridai', to: 'minato', start: 8*60+16 }, 2: { from: 'moridai', to: 'hanazono', start: 8*60+16 } } },
   },
-  levelEvent: { 1: 'doze', 2: 'delay' },   // レベル1：うとうと寝すごし　レベル2：電車の遅れ
+  events: ['doze', 'delay'],   // うとうと寝すごし／電車の遅れ（毎回どちらか）
 };
 const BASE = { ao: { '1': 386.8, '-1': 392 }, midori: { '1': 391, '-1': 393.5 } }; // 始発駅の発車基準（分）
 
@@ -559,6 +563,15 @@ function makeTrain(L, dir, pside) {
     }
     plane(ledTex, 2.4, 0.45, g, pside * 1.58, 3.95, cz - 3, pside > 0 ? Math.PI / 2 : -Math.PI / 2);
   }
+  for (const e of [-1, 1]) {
+    const z = e * 30.2;
+    box(3, 3.2, 1.0, '#eef0f3', 0, 2.6, z, g);
+    box(3.04, 0.35, 1.0, lm, 0, 1.75, z, g);
+    box(2.5, 1.05, 0.06, '#1b2433', 0, 3.15, e * 30.72, g);
+    box(2.6, 0.55, 0.5, '#2a2d33', 0, 0.75, e * 30.2, g);
+    for (const x of [-1.05, 1.05]) box(0.38, 0.22, 0.06, '#fff6c8', x, 2.1, e * 30.72, g);
+    plane(ledTex, 1.5, 0.28, g, 0, 3.92, e * 30.74, e > 0 ? 0 : Math.PI);
+  }
   g.userData = { doors, p: 0, target: 0 };
   return g;
 }
@@ -607,7 +620,7 @@ function buildStation(sId) {
       plane(trackSignTex(L, dir, num, sId, dir > 0), 3.2, 1.07, g, cx + dir * 1.6, 4.6, -16, 0);
     }
     // 駅名標
-    for (const bz of [34, -22]) {
+    for (const bz of [37.6, 0, -26]) {
       for (const f of [1, -1]) plane(nameBoardTex(sId, L, f < 0), 4.8, 1.8, g, cx + f * 0.06, 2.4, bz, f > 0 ? Math.PI / 2 : -Math.PI / 2);
       box(0.1, 1.9, 4.9, '#8c95a6', cx, 2.4, bz, g);
     }
@@ -638,7 +651,7 @@ function buildStation(sId) {
   st.upper.push({ x0: -13.6, x1: xmax - 0.4, z0: -5.6, z1: 5.6 });
   // 改札
   for (const z of [-4.8, -2.4, 0, 2.4, 4.8]) { box(1.8, 1.0, 0.4, '#d7dbe2', -8, 7.5, z, g); box(0.3, 0.05, 0.3, '#2f6fd6', -8.5, 8.02, z, g); }
-  plane(signTex([['改札  のりば →', 'かいさつ　のりば']]), 6, 1.56, g, -6, 10.4, 0, -Math.PI / 2);
+  plane(signTex([[SET.stations[sId].name + ' 駅', SET.stations[sId].kana + ' えき']]), 6, 1.56, g, -6, 10.4, 0, -Math.PI / 2);
   plane(signTex([['← 出口', 'でぐち']], '#f2c21a'), 4, 1.04, g, -6, 10.4, 0, Math.PI / 2);
   plane(signTex([[SET.stations[sId].name + ' 駅', SET.stations[sId].kana + ' えき']]), 7, 1.82, g, -13.4, 10.5, 0, Math.PI / 2);
   const sf = makePerson('#1b2a4a', { cap: true, leg: '#1b2a4a' }); sf.position.set(-5.5, 7, -4.3); sf.rotation.y = -Math.PI / 2; g.add(sf);
@@ -675,7 +688,7 @@ const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, 
   for (const z of [-9, -3, 3, 9]) box(0.08, 3, 0.08, '#c9ced6', 0.9, 2.5, z, g);
   box(0.6, 0.05, 28, '#fff8d8', 0, 3.94, 0, g);
   [['#6d8fb8', -5.6], ['#c46b6b', 4.2], ['#7fae7a', 8.6]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.15, 0.9, z); p.rotation.y = -Math.PI / 2; sitPose(p); g.add(p); });
-  RIDE.me = makePerson('#f07a2a', { bag: '#2c3f66' }); RIDE.me.position.set(1.15, 0.9, -2.5); RIDE.me.rotation.y = -Math.PI / 2; sitPose(RIDE.me); RIDE.me.visible = false; g.add(RIDE.me);
+  RIDE.me = makePerson('#f07a2a', { bag: '#2c3f66' }); RIDE.me.position.set(1.15, 0.9, -2.5); RIDE.me.rotation.y = -Math.PI / 2; sitPose(RIDE.me); g.add(RIDE.me);
   box(400, 0.2, 400, '#9aa58e', 0, -0.4, 0, g);
   let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 40; i++) { const h = 3 + rnd() * 16, w = 4 + rnd() * 6; const z0 = -150 + i * 7.5; const b = building(g, 10 + rnd() * 40, z0, w, h + 3, i); b.position.y = -0.3; b.userData.z0 = z0; RIDE.outside.push(b); }
@@ -687,7 +700,7 @@ const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, 
 function setRideSign(s, L) {
   if (RIDE.shown === s) return; RIDE.shown = s;
   if (RIDE.signMesh) { RIDE.plat.remove(RIDE.signMesh); RIDE.signMesh.material.map.dispose(); RIDE.signMesh.material.dispose(); RIDE.signMesh.geometry.dispose(); }
-  RIDE.signMesh = plane(nameBoardTex(s, L, false), 4.4, 1.65, RIDE.plat, 7.2, 2.5, 0, -Math.PI / 2);
+  RIDE.signMesh = plane(nameBoardTex(s, L, true), 4.4, 1.65, RIDE.plat, 7.2, 2.5, 0, -Math.PI / 2);
 }
 function drawPanel(g, w, h) {
   g.fillStyle = '#1f2b45'; g.fillRect(0, 0, w, h);
@@ -700,7 +713,7 @@ function drawPanel(g, w, h) {
   g.textAlign = 'left'; g.fillStyle = '#ffd27a'; g.font = `700 44px ${FONT}`;
   g.fillText(S.stopped ? (S.end ? 'しゅうてん' : 'ただいま') : 'つぎは', 36, 150);
   const nm = SET.stations[st[S.i]]; nameKana(g, nm.name, nm.kana, 640, 152, 90, '#fff', '#cfd8ff');
-  const order = S.dir > 0 ? st : [...st].reverse(), n = order.length, x0 = 70, x1 = w - 70, y = 238;
+  const order = st, n = order.length, x0 = 70, x1 = w - 70, y = 238;
   g.strokeStyle = col; g.lineWidth = 8; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
   const ci = order.indexOf(st[S.i]);
   order.forEach((s, j) => {
@@ -709,7 +722,8 @@ function drawPanel(g, w, h) {
     g.textAlign = 'center'; g.fillStyle = cur ? '#ffd27a' : (j < ci ? '#8a93a8' : '#fff'); g.font = `${cur ? 700 : 400} 28px ${FONT}`;
     fitText(g, SET.stations[s].name, x, y + 56, (x1 - x0) / (n - 1) - 8);
   });
-  if (S.dir) { g.fillStyle = '#ffd27a'; g.font = `700 30px ${FONT}`; g.textAlign = 'right'; g.fillText('すすむ むき ▶', x1, y - 30); }
+  g.fillStyle = '#ffd27a'; g.font = `700 30px ${FONT}`;
+  if (S.dir > 0) { g.textAlign = 'right'; g.fillText('すすむ むき ▶', x1, y - 30); } else { g.textAlign = 'left'; g.fillText('◀ すすむ むき', x0, y - 30); }
 }
 
 /* =========================================================
@@ -752,14 +766,15 @@ const HOWTO = [
   [ICON.clock, '{左上|ひだりうえ}に いまの {時刻|じこく}。のりかえ{案内|あんない}の {時刻|じこく}と くらべよう。'],
 ];
 function renderHowto(el) { el.innerHTML = HOWTO.map(([ic, t]) => `<div class="how">${ic}<div>${rb(t)}</div></div>`).join(''); }
+$('#anaTicks').innerHTML = Array.from({ length: 12 }, (_, i) => { const a = i * Math.PI / 6, r1 = i % 3 ? 38 : 33; return `<line x1="${50 + Math.sin(a) * r1}" y1="${50 - Math.cos(a) * r1}" x2="${50 + Math.sin(a) * 42}" y2="${50 - Math.cos(a) * 42}" stroke="#1b2a4a" stroke-width="${i % 3 ? 2 : 4}"/>`; }).join('');
 renderHowto($('#howto1')); renderHowto($('#howto2'));
 
 function renderChoices() {
   const sc = [['school', '{学校|がっこう}へ{行|い}く', '{担任|たんにん}の{先生|せんせい}に {連絡|れんらく}'], ['work', '{職場|しょくば}{体験|たいけん}', '{職場|しょくば}の{人|ひと}に {連絡|れんらく}']];
   $('#chScene').innerHTML = sc.map(([k, a, b]) => `<button class="choice ${G.sceneKey === k ? 'sel' : ''}" data-k="${k}"><b>${rb(a)}</b>${rb(b)}</button>`).join('');
   const lv = [[1, 'レベル1', '{乗|の}りかえなし（1つの{電車|でんしゃ}）'], [2, 'レベル2', '{乗|の}りかえ 1{回|かい}']];
-  const md = [[false, 'ふつう', 'まちがえることも できる'], [true, 'かんたん', '{駅員|えきいん}さんが まちがいを とめてくれる（{決|き}まったトラブルだけ おきる）']];
-  $('#chMode').innerHTML = md.map(([k, a, b]) => `<button class="choice ${G.easy === k ? 'sel' : ''}" data-m="${k}"><b>${a}</b>${rb(b)}</button>`).join('');
+  const md = [[true, 'かんたん'], [false, 'ふつう']];
+  $('#chMode').innerHTML = md.map(([k, a]) => `<button class="choice ${G.easy === k ? 'sel' : ''}" data-m="${k}"><b>${a}</b></button>`).join('');
   $('#chLevel').innerHTML = lv.map(([k, a, b]) => `<button class="choice ${G.level === k ? 'sel' : ''}" data-l="${k}"><b>${a}</b>${rb(b)}</button>`).join('');
 }
 renderChoices();
@@ -817,11 +832,11 @@ function makePlan() {
 }
 function renderPlan(first) {
   const P = G.plan;
-  $('#planTitle').innerHTML = rb('のりかえ{案内|あんない}');
+  $('#planTitle').innerHTML = rb('やること（のりかえ{案内|あんない}）');
   const story = G.sceneKey === 'school'
     ? `{今日|きょう}は {電車|でんしゃ}で {学校|がっこう}へ {行|い}きます。${fm(P.deadline)}までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}れば、{朝|あさ}の{会|かい}に {間|ま}に{合|あ}います。`
     : `{今日|きょう}は {職場|しょくば}{体験|たいけん}。{電車|でんしゃ}で お{店|みせ}へ {行|い}きます。${fm(P.deadline)}までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}れば、{仕事|しごと}の{始|はじ}まりに {間|ま}に{合|あ}います。`;
-  $('#planStory').innerHTML = `<div class="nowline">${rb('いまの {時刻|じこく}')}　${fm(G.t)}</div><br>` + rb(story);
+  $('#planStory').innerHTML = rb(story);
   let h = '';
   P.legs.forEach((leg, n) => {
     const col = LN(leg.L).color;
@@ -850,7 +865,7 @@ function openPhone(incoming) {
   PH = { incoming, sel: {}, rows: [
     { key: 'name', lab: 'だれ？（{名前|なまえ}）', opts: [{ txt: `${school}${me}です`, ok: true }, NONE] },
     { key: 'where', lab: 'いま どこ？', opts: [...shuffle([where, ...others]), NONE] },
-    { key: 'late', lab: 'おくれることを つたえる', opts: [{ txt: '{少|すこ}し おくれます', ok: true }, { txt: 'おくれます（{何分|なんぷん}かは わかりません）', ok: true }, NONE] },
+    { key: 'late', lab: 'おくれることを つたえる', opts: [...(G.delay && G.delayAnnounced ? [{ txt: `${minTxt(G.delay.min)}くらい おくれます`, ok: true }] : []), { txt: '{少|すこ}し おくれます', ok: true }, { txt: 'おくれます（{何分|なんぷん}かは わかりません）', ok: true }, NONE] },
     { key: 'plan', lab: 'これから どうする？', opts: [{ txt: '{次|つぎ}の {電車|でんしゃ}で {向|む}かいます', ok: true }, { txt: '{駅員|えきいん}さんに きいて {向|む}かいます', ok: true }, { txt: 'このまま {電車|でんしゃ}に のっています', ok: false }, NONE] },
   ] };
   $('#phWho').innerHTML = rb(`${contactMk()} ${incoming ? 'から {電話|でんわ}' : 'に {連絡|れんらく}'}`);
@@ -895,26 +910,38 @@ $('#btnCallAns').onclick = () => { closeOv('ovCall'); $('#btnPhone').classList.r
 /* ---------- 駅員さん ---------- */
 function consult() {
   G.consulted = true;
-  const s = station.id; const c = correctBoard(s); const dest = G.mission.to;
-  let say;
-  const opts = [];
-  if (!c) say = `ここが ${sn(dest)}{駅|えき}ですよ。{改札|かいさつ}は {階段|かいだん}を のぼった {先|さき}です。`;
+  const dest = G.mission.to;
+  const asks = [
+    ['go', `${sn(dest)}へ {行|い}きたいです`],
+    ['wrong', '{電車|でんしゃ}を まちがえて しまいました'],
+    ['pass', 'おりる {駅|えき}を すぎて しまいました'],
+    ['late', '{電車|でんしゃ}は おくれていますか？'],
+  ];
+  $('#stSay').innerHTML = rb('「どうしましたか？」');
+  $('#stOpts').innerHTML = asks.map(([k, t]) => `<button class="sub-btn" data-ask="${k}">${rb(t)}</button>`).join('');
+  $('#stOpts').querySelectorAll('[data-ask]').forEach(b => b.onclick = () => answerStaff(b.dataset.ask, asks.find(a => a[0] === b.dataset.ask)[1]));
+  openOv('ovStaff');
+}
+function answerStaff(kind, said) {
+  const s = station.id, c = correctBoard(s), dest = G.mission.to;
+  let route;
+  if (!c) route = `ここが ${sn(dest)}{駅|えき}ですよ。{改札|かいさつ}は {階段|かいだん}を のぼった {先|さき}です。`;
   else {
     const num = trackNum(s, c.line, c.dir), term = termName(c.line, c.dir);
-    say = `${sn(dest)}へは、<b>${num}{番線|ばんせん}</b>の ${ln(c.line)}　${sn(term)}{方面|ほうめん}に のってください。`;
-    if (c.line !== destLine()) say += `<br>${sn(TRANSFER)}で ${ln(destLine())}に のりかえです。`;
-    if (G.firstTroubleT != null) say += `<br>あわてなくて {大丈夫|だいじょうぶ}ですよ。${placeMk()}には {連絡|れんらく}しましたか？`;
-    setGuide(c.line, c.dir);
+    route = `${sn(dest)}へは、<b>${num}{番線|ばんせん}</b>の ${ln(c.line)}　${sn(term)}{方面|ほうめん}に のってください。`;
+    if (c.line !== destLine()) route += `<br>${sn(TRANSFER)}で ${ln(destLine())}に のりかえです。`;
   }
-  $('#stSay').innerHTML = rb(`「${say}」`);
+  let say = route;
+  if (kind === 'wrong' || kind === 'pass') say = `だいじょうぶですよ。<br>${route}`;
+  if (kind === 'late') say = (G.delay && G.delayAnnounced ? `${ln(G.delay.L)}は やく${minTxt(G.delay.min)} おくれています。` : `いまは おくれていませんよ。`) + `<br>${route}`;
+  if (G.firstTroubleT != null && !G.reportedOk) say += `<br>${placeMk()}には {連絡|れんらく}しましたか？`;
+  $('#stSay').innerHTML = rb(`<div style="color:#5b6b88">あなた「${said}」</div>{駅員|えきいん}さん「${say}」`);
   $('#stOpts').innerHTML = `<button class="big-btn">${rb('ありがとうございます')}</button>`;
   $('#stOpts').firstChild.onclick = () => closeOv('ovStaff');
-  openOv('ovStaff');
 }
 function setGuide(L, dir) {
   const tr = station.tracks.find(t => t.L === L && t.dir === dir); if (!tr) return;
   G.guide = { x: tr.cx + dir * 1.7, z: 22, x2: tr.cx };
-  guideArrow.visible = guideArrow2.visible = true;
 }
 
 /* ---------- 結果 ---------- */
@@ -957,22 +984,33 @@ function finish(timeout) {
   openOv('ovResult');
 }
 $('#btnResAgain').onclick = () => { closeOv('ovResult'); startMission(); };
-$('#btnResMenu').onclick = () => { closeOv('ovResult'); G.phase = 'title'; buildStation('moridai'); renderChoices(); openOv('ovStart'); };
+$('#btnResMenu').onclick = () => { closeOv('ovResult'); G.phase = 'title'; G.mission = null; buildStation('moridai'); renderChoices(); openOv('ovStart'); };
 
 /* =========================================================
    ゲーム進行
    ========================================================= */
+function pickMission() {
+  const r = a => a[Math.floor(Math.random() * a.length)];
+  const inner = L => LN(L).stations.filter((s, i) => i > 0 && i < LN(L).stations.length - 1 && s !== TRANSFER);
+  let from, to;
+  if (G.level === 1) {
+    const pairs = [];
+    for (const L of LINE_ORDER) for (const a of inner(L)) for (const b of inner(L)) { const d = Math.abs(idxOf(a, L) - idxOf(b, L)); if (d >= 2 && d <= 4) pairs.push([a, b]); }
+    [from, to] = r(pairs);
+  } else { const L1 = r(LINE_ORDER), L2 = LINE_ORDER.find(L => L !== L1); from = r(inner(L1)); to = r(inner(L2)); }
+  return { from, to, start: CFG.startBase[G.sceneKey] + Math.floor(Math.random() * CFG.startSpread), event: r(CFG.events) };
+}
 function startMission() {
   if (station) station.group.visible = true;
-  const m = CFG.scenes[G.sceneKey].missions[G.level];
+  const m = pickMission();
   Object.assign(G, { mission: m, delay: null, t: m.start, ride: null, lastAlight: null, troubles: [], onPlan: true, legIdx: 0,
     firstTroubleT: null, lastTroubleT: null, reportedOk: false, quality: 0, reports: [], damage: 0, consulted: false,
     worryStep: 0, callShown: false, called: false, dozeDone: false, dozing: false, delayAnnounced: false, delayTrigger: 1e9, exitT: null, timeout: false, ff: false, result: null });
   G.plan = makePlan();
-  if (CFG.levelEvent[G.level] === 'delay' && G.plan.legs.length > 1) {
-    const leg = G.plan.legs[1];
-    G.delay = { L: leg.L, dir: leg.dir, k: leg.k - 1, min: CFG.delayMin };
-    G.delayTrigger = arrT(leg.L, leg.dir, leg.k - 1, leg.i, true) - 2;
+  if (m.event === 'delay') {
+    const leg = G.plan.legs[G.plan.legs.length - 1];
+    G.delay = { L: leg.L, dir: leg.dir, k: leg.k - 1, min: CFG.delayChoices[Math.floor(Math.random() * CFG.delayChoices.length)], from: leg.from };
+    G.delayTrigger = Math.max(m.start + 0.3, arrT(leg.L, leg.dir, leg.k - 1, leg.i, true) - 2);
   }
   buildStation(m.from);
   Object.assign(G.P, { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2, vx: 0, vz: 0, spd: 0 });
@@ -1127,7 +1165,7 @@ function update(dtReal) {
   }
   // レベル2：電車の遅れ
   if (G.delay && !G.delayAnnounced && G.exitT == null) {
-    const atT = G.phase === 'station' && station.id === TRANSFER;
+    const atT = G.phase === 'station' && station.id === G.delay.from;
     const onIt = G.ride && G.ride.L === G.delay.L && G.ride.dir === G.delay.dir;
     const atDest = G.phase === 'station' && station.id === G.mission.to;
     if ((G.t >= G.delayTrigger || atT) && !onIt && !atDest) {
@@ -1184,7 +1222,7 @@ function update(dtReal) {
     }
     // レベル1：うとうと
     const tI = targetIdx(R.L);
-    if (CFG.levelEvent[G.level] === 'doze' && !G.dozeDone && G.troubles.length === 0 && !R.wrongCounted && R.i === tI && R.boardedAt !== R.i && R.dir === Math.sign(tI - R.boardedAt) && G.t >= arrT(R.L, R.dir, R.k, R.i) - 0.5) {
+    if (G.mission.event === 'doze' && !G.dozeDone && G.troubles.length === 0 && !R.wrongCounted && R.i === tI && R.boardedAt !== R.i && R.dir === Math.sign(tI - R.boardedAt) && G.t >= arrT(R.L, R.dir, R.k, R.i) - 0.5) {
       G.dozeDone = true; G.dozing = true; G.ff = false; $('#doze').hidden = false;
     }
     if (G.dozing && R.i !== tI && G.t >= depT(R.L, R.dir, R.k, tI) + 0.35) {
@@ -1222,12 +1260,13 @@ function updateRideView(dtReal) {
     RIDE.ps = { L, dir: R.dir, i: R.i, stopped, end: R.i === endIdx(L, R.dir) }; redraw(RIDE.panelTex);
     if (first && stopped) { SND.door(); if (G.easy && !G.dozing && !R.wrongCounted && R.i === targetIdx(L) && R.i !== R.boardedAt) banner('ここで おりよう！「おりる」を おそう', 'info', 5); }
   }
-  RIDE.me.visible = G.dozing;
-  if (G.dozing) RIDE.me.userData.head.rotation.x = 0.55 + Math.sin(G.elapsed * 1.8) * 0.18;
+  const hd = RIDE.me.userData.head; const want = G.dozing ? 0.55 + Math.sin(G.elapsed * 1.8) * 0.18 : 0;
+  hd.rotation.x += (want - hd.rotation.x) * Math.min(1, dtReal * 4);
   $('#led').hidden = true;
 }
 function updateHUD() {
   $('#tNow').textContent = fm(G.t);
+  { const mm = Math.floor(G.t + 1e-6); $('#mHand').setAttribute('transform', `rotate(${(mm % 60) * 6} 50 50)`); $('#hHand').setAttribute('transform', `rotate(${((mm / 60) % 12) * 30} 50 50)`); }
   $('#btnFF').classList.toggle('on', G.ff);
   // ボタン
   const act = $('#btnAct'); let a = null;
