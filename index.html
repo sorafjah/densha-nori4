@@ -27,18 +27,20 @@ rt{font-size:.5em;font-weight:400}
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10}
 #hud>*{pointer-events:auto}
-#hud>#clock,#hud>#banner,#hud>#led{position:absolute;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:min(640px,calc(100vw - 300px));background:rgba(255,255,255,.94);border-radius:14px;border-top:8px solid var(--lc,#2f6fd6);padding:8px 16px 10px;color:var(--navy);pointer-events:none;box-shadow:0 3px 12px rgba(20,30,60,.25)}
-#led .big{font-size:28px;font-weight:700;text-align:center;line-height:1.6}
-#led .sub{font-size:15px;color:var(--muted);text-align:center}
-.route{display:flex;align-items:flex-start;justify-content:space-between;margin-top:6px;position:relative;padding-top:6px}
-.route::before{content:"";position:absolute;left:4%;right:4%;top:14px;height:4px;background:var(--lc,#888);border-radius:2px}
-.route .st{flex:1;text-align:center;font-size:13px;color:var(--muted);position:relative;line-height:1.5}
-.route .st .dot{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--lc,#888);margin:0 auto 4px}
-.route .st.now .dot{background:var(--led);border-color:var(--navy);transform:scale(1.25)}
-.route .st.now{color:var(--navy);font-weight:700}
-.route .st.next .dot{background:var(--lc,#888)}
-.route .st.next{color:var(--navy);font-weight:700}
-@media (max-width:760px){#led{width:calc(100vw - 32px);bottom:calc(200px + env(safe-area-inset-bottom,0px))}}
+#hud>#clock,#hud>#banner,#hud>#led{pointer-events:none}
+.panel{background:rgba(255,255,255,.94);border-radius:14px;box-shadow:0 3px 12px rgba(20,30,60,.25)}
+#clock{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 16px 10px;min-width:220px;max-width:300px}
+#clock .nowlab{font-size:15px;font-weight:700;color:var(--muted)}
+#tNow{font-size:44px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+#tGoal{font-size:15px;margin-top:4px;line-height:1.7}
+#topright{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:8px}
+.round{width:52px;height:52px;border-radius:50%;border:none;background:#fff;color:var(--navy);font-size:26px;font-weight:700;box-shadow:0 3px 10px rgba(20,30,60,.3)}
+#banner{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:max-content;max-width:min(560px,calc(100vw - 640px));min-width:260px;padding:12px 18px;font-size:18px;line-height:1.8;font-weight:700;text-align:center}
+#banner.warn{background:#fff3f0;border:3px solid var(--warn)}
+#banner.info{background:#fff;border:3px solid var(--navy2)}
+#banner.call{background:#fffbe8;border:3px solid var(--led)}
+@media (max-width:900px){#banner{max-width:calc(100vw - 24px);top:calc(150px + env(safe-area-inset-top,0px))}}
+#led{display:none}
 #joy{position:absolute;left:calc(24px + env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.35);border:3px solid rgba(255,255,255,.8);touch-action:none}
 #knob{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 #rbtns{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:12px}
@@ -52,7 +54,7 @@ rt{font-size:.5em;font-weight:400}
 #btnAct.board{background:var(--ok)}
 #btnAct.alight{background:var(--warn)}
 #btnAct.ask{background:var(--navy2)}
-#doze{position:fixed;inset:0;background:rgba(8,10,25,.88);z-index:20;display:flex;align-items:center;justify-content:center;color:#cfd8ff;font-size:40px;font-weight:700;pointer-events:none}
+#doze{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(8,10,25,.15),rgba(8,10,25,.75));z-index:20;display:flex;align-items:flex-start;justify-content:center;padding-top:22vh;color:#fff;text-shadow:0 2px 8px #000;font-size:40px;font-weight:700;pointer-events:none}
 #doze[hidden]{display:none}
 
 /* overlays */
@@ -77,8 +79,12 @@ rt{font-size:.5em;font-weight:400}
 .how{display:flex;gap:10px;align-items:flex-start;background:#f3f6fb;border-radius:12px;padding:10px;font-size:15px;line-height:1.75}
 .how svg{flex:0 0 52px;width:52px;height:52px}
 @media (max-width:760px){.howto{grid-template-columns:1fr}.choose{grid-template-columns:1fr}}
-.plan .leg{display:grid;grid-template-columns:72px 18px 1fr;gap:0 10px;align-items:stretch}
-.plan .tm{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;padding-top:2px}
+.plan .leg{display:grid;grid-template-columns:100px 18px 1fr;gap:0 10px;align-items:stretch}
+.plan .tm{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;justify-content:flex-end;gap:4px;padding-top:2px}
+.plan .tm small{font-size:15px;font-weight:700;color:var(--muted)}
+.plan .ride .mt{margin-top:6px}
+.nowline{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:2px 12px;font-weight:700;margin-bottom:8px}
+.feel{font-size:20px;font-weight:700;background:#f3f6fb;border-radius:12px;padding:12px 16px}
 .plan .bar{border-radius:9px;margin:6px 0}
 .plan .node{width:18px;height:18px;border-radius:50%;border:4px solid var(--navy);background:#fff;margin-top:8px}
 .plan .stn{font-size:22px;font-weight:700}
@@ -125,16 +131,15 @@ rt{font-size:.5em;font-weight:400}
   }
 }
 </script>
-<!-- build: 2026-10-10c -->
+<!-- build: 2026-10-10d -->
 <div id="stage"></div>
-<div id="ver">v2026-10-10c</div>
+<div id="ver">v2026-10-10d</div>
 
 <div id="hud" hidden>
   <div id="clock" class="panel">
+    <div class="nowlab">いまの <ruby>時刻<rt>じこく</rt></ruby></div>
     <div id="tNow">7:41</div>
     <div id="tGoal"></div>
-    <div class="meter"><div class="mlabel"><ruby>困<rt>こま</rt></ruby>り<ruby>度<rt>ど</rt></ruby></div><div class="mbar"><i id="mFill"></i></div><b id="mVal">0</b></div>
-    <div id="mRate"></div>
   </div>
   <div id="topright"><button id="btnHelp" class="round" aria-label="あそびかた">？</button></div>
   <div id="banner" hidden></div>
@@ -163,6 +168,8 @@ rt{font-size:.5em;font-weight:400}
     <div class="choose" id="chScene"></div>
     <h3>レベル</h3>
     <div class="choose" id="chLevel"></div>
+    <h3>モード</h3>
+    <div class="choose" id="chMode"></div>
     <h3>あそびかた</h3>
     <div class="howto" id="howto1"></div>
     <div class="btnrow">
@@ -244,7 +251,7 @@ rt{font-size:.5em;font-weight:400}
   <div class="card scroll" style="max-width:760px">
     <h2 id="resTitle"></h2>
     <dl class="reslist" id="resList"></dl>
-    <h3><ruby>困<rt>こま</rt></ruby>り<ruby>度<rt>ど</rt></ruby>くらべ</h3>
+    <h3>まっていた<ruby>人<rt>ひと</rt></ruby>の きもち</h3>
     <div class="bars" id="resBars"></div>
     <div class="lesson" id="resLesson"></div>
     <div class="btnrow">
@@ -261,7 +268,7 @@ import * as THREE from 'three';
    設定（数値はここだけ直せば変わります）
    ========================================================= */
 const CFG = {
-  version: 'v2026-10-10c',
+  version: 'v2026-10-10d',
   timeScale: 8,          // ゲーム内の秒 ÷ 実時間の秒（8なら 1分が 7.5秒）
   ffScale: 4,            // 「はやおくり」中の倍率
   headway: 5,            // 電車の間隔（分）
@@ -283,8 +290,8 @@ const CFG = {
   delayMin: 12,          // レベル2の電車遅れ（分）
   meterMax: 60,
   lines: {
-    ao:     { name: 'あお線',   kana: 'あおせん',   color: '#2f6fd6', stations: ['yamate','moridai','kawabe','chuo','sakura','minato','umibe'] },
-    midori: { name: 'みどり線', kana: 'みどりせん', color: '#21a05f', stations: ['higashi','chuo','hoshi','hanazono','kitamori'] },
+    ao:     { name: '東西線',   kana: 'とうざいせん',   color: '#2f6fd6', stations: ['yamate','moridai','kawabe','chuo','sakura','minato','umibe'] },
+    midori: { name: '南北線',   kana: 'なんぼくせん', color: '#21a05f', stations: ['higashi','chuo','hoshi','hanazono','kitamori'] },
   },
   stations: {
     yamate:   { name: '山手',     kana: 'やまて' },
@@ -317,7 +324,15 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"{}|]/g, '');
 const rb = s => String(s).replace(/\{([^|{}]+)\|([^{}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
 const hasKanji = s => /[㐀-鿿々]/.test(s);
-const fur = (name, kana) => hasKanji(name) && kana ? `{${esc(name)}|${esc(kana)}}` : esc(name);
+function fur(name, kana) {
+  name = esc(name); kana = esc(kana || '');
+  if (!hasKanji(name) || !kana) return name;
+  const segs = name.match(/[㐀-鿿々]+|[^㐀-鿿々]+/g);
+  const re = new RegExp('^' + segs.map(t => hasKanji(t) ? '(.+?)' : t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('') + '$');
+  const m = kana.match(re);
+  if (!m) return `{${name}|${kana}}`;
+  let i = 1; return segs.map(t => hasKanji(t) ? `{${t}|${m[i++]}}` : t).join('');
+}
 let SET;
 function resetSettings() { SET = JSON.parse(JSON.stringify({ stations: CFG.stations, lines: { ao: { name: CFG.lines.ao.name, kana: CFG.lines.ao.kana }, midori: { name: CFG.lines.midori.name, kana: CFG.lines.midori.kana } }, people: CFG.people })); }
 resetSettings();
@@ -355,7 +370,7 @@ const targetIdx = (L) => L === destLine() ? idxOf(G.mission.to, L) : idxOf(TRANS
 /* ---------- 状態 ---------- */
 const G = {
   phase: 'title', t: 0, frames: 0, elapsed: 0, ff: false,
-  sceneKey: 'school', level: 1, mission: null, plan: null,
+  sceneKey: 'school', level: 1, easy: false, mission: null, plan: null,
   P: { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2, vx: 0, vz: 0, spd: 0, walk: 0 },
   cam: { yaw: 0, pitch: 0.36, dist: 7.5 },
   ride: null, lastAlight: null, troubles: [], onPlan: true, legIdx: 0,
@@ -417,19 +432,21 @@ function makePerson(color, opt = {}) {
     g.add(p); return p; };
   const legL = limb(-0.16, 0.68, 0.24, 0.66, legC), legR = limb(0.16, 0.68, 0.24, 0.66, legC);
   const armL = limb(-0.41, 1.44, 0.17, 0.6, color, true), armR = limb(0.41, 1.44, 0.17, 0.6, color, true);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.27, 18, 14), M('#f2cfa8')); head.position.y = 1.74; g.add(head);
+  const hg = new THREE.Group(); hg.position.y = 1.48; g.add(hg);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.27, 18, 14), M('#f2cfa8')); head.position.y = 0.26; hg.add(head);
   if (opt.cap) {
-    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.29, 0.3, 0.17, 18), M('#1b2a4a')); c.position.y = 1.95; g.add(c);
-    const br = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 16, 1, false, -Math.PI / 2, Math.PI), M('#1b2a4a')); br.position.set(0, 1.88, 0.2); g.add(br);
-    box(0.16, 0.07, 0.03, '#ffb020', 0, 1.97, 0.29, g);
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.29, 0.3, 0.17, 18), M('#1b2a4a')); c.position.y = 0.47; hg.add(c);
+    const br = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 16, 1, false, -Math.PI / 2, Math.PI), M('#1b2a4a')); br.position.set(0, 0.4, 0.2); hg.add(br);
+    box(0.16, 0.07, 0.03, '#ffb020', 0, 0.49, 0.29, hg);
   } else {
     const hair = new THREE.Mesh(new THREE.SphereGeometry(0.295, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.52), M(opt.hair || '#2b2420'));
-    hair.position.set(0, 1.76, -0.02); hair.rotation.x = -0.35; g.add(hair);
+    hair.position.set(0, 0.28, -0.02); hair.rotation.x = -0.35; hg.add(hair);
   }
   if (opt.bag) box(0.5, 0.56, 0.22, opt.bag, 0, 1.1, -0.31, g);
-  g.userData.limbs = { legL, legR, armL, armR };
+  g.userData.limbs = { legL, legR, armL, armR }; g.userData.head = hg;
   return g;
 }
+function sitPose(p) { const L = p.userData.limbs; L.legL.rotation.x = L.legR.rotation.x = -1.45; L.armL.rotation.x = L.armR.rotation.x = -0.45; }
 function animPerson(p, phase, amt) {
   const L = p.userData.limbs; if (!L) return; const sw = Math.sin(phase) * 0.65 * amt;
   L.legL.rotation.x = sw; L.legR.rotation.x = -sw; L.armL.rotation.x = -sw * 0.8; L.armR.rotation.x = sw * 0.8;
@@ -491,29 +508,28 @@ function nameBoardTex(s, L, rightIsPlus) {
     g.textAlign = 'left'; g.fillStyle = LN(L).color; g.fillRect(24, 22, 170, 52); g.fillStyle = '#fff'; g.font = `700 32px ${FONT}`; fitText(g, SET.lines[L].name, 34, 60, 150);
   });
 }
-function depBoardTex(s, L) {
-  return canvasTex(1024, 520, (g, w, h) => {
+function depBoardTex(s, L, dir) {
+  return canvasTex(768, 480, (g, w, h) => {
+    const i = idxOf(s, L), num = trackNum(s, L, dir), term = termName(L, dir), left = dir > 0;
     g.fillStyle = '#1b2a4a'; g.fillRect(0, 0, w, h);
-    g.fillStyle = LN(L).color; g.fillRect(0, 0, w, 70);
-    g.fillStyle = '#fff'; g.font = `700 44px ${FONT}`; g.textAlign = 'left'; g.fillText(SET.lines[L].name + '　のりば ↓', 24, 52);
-    g.fillStyle = '#111'; g.fillRect(16, 84, w - 32, h - 100);
-    let y = 150;
-    for (const dir of [-1, 1]) {
-      const i = idxOf(s, L); if (i === endIdx(L, dir)) continue;
-      const num = trackNum(s, L, dir), term = termName(L, dir);
-      const kc = Math.floor((G.t - arrT(L, dir, 0, i, true)) / CFG.headway) - 3;
-      let n = 0;
-      for (let k = Math.max(0, kc); k < kc + 10 && n < 2; k++) {
-        if (depT(L, dir, k, i) < G.t) continue;
-        const sched = depT(L, dir, k, i, true), late = delayOf(L, dir, k) > 0 && G.delayAnnounced;
-        g.textAlign = 'left'; g.fillStyle = '#ffb020'; g.font = `700 50px ${FONT}`;
-        g.fillText(fm(sched), 40, y);
-        g.fillText(SET.stations[term].name + ' ゆき', 200, y);
-        g.font = `400 22px ${FONT}`; g.fillText(SET.stations[term].kana, 205, y + 30);
-        g.font = `700 44px ${FONT}`; g.textAlign = 'right'; g.fillStyle = late ? '#ff5a45' : '#7cf08a';
-        g.fillText(late ? `${G.delay.min}分おくれ` : `${num}番線`, w - 40, y);
-        y += 92; n++;
-      }
+    g.fillStyle = LN(L).color; g.fillRect(0, 0, w, 128);
+    const ax = left ? 70 : w - 70, nx = left ? 190 : w - 190;
+    g.fillStyle = '#ffb020'; g.font = `700 90px ${FONT}`; g.textAlign = 'center'; g.fillText(left ? '◀' : '▶', ax, 98);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(nx, 64, 52, 0, 7); g.fill();
+    g.fillStyle = '#1b2a4a'; g.font = `700 70px ${FONT}`; g.fillText(num, nx, 90);
+    const tx = left ? 290 : 40; g.textAlign = 'left'; g.fillStyle = '#fff'; g.font = `700 30px ${FONT}`; g.fillText(SET.lines[L].name + '　' + num + '番線', tx, 46);
+    g.font = `700 46px ${FONT}`; fitText(g, SET.stations[term].name + ' 方面', tx, 100, 440);
+    g.fillStyle = '#111'; g.fillRect(14, 140, w - 28, h - 154);
+    if (i === endIdx(L, dir)) { g.fillStyle = '#ffb020'; g.font = `700 40px ${FONT}`; g.textAlign = 'center'; g.fillText('この ホームの 電車は', w / 2, 270); g.fillText('ここで おわりです', w / 2, 330); return; }
+    const kc = Math.floor((G.t - arrT(L, dir, 0, i, true)) / CFG.headway) - 3;
+    let n = 0, y = 230;
+    for (let k = Math.max(0, kc); k < kc + 10 && n < 2; k++) {
+      if (depT(L, dir, k, i) < G.t) continue;
+      const sched = depT(L, dir, k, i, true), late = delayOf(L, dir, k) > 0 && G.delayAnnounced;
+      g.textAlign = 'left'; g.fillStyle = '#ffb020'; g.font = `700 52px ${FONT}`;
+      g.fillText(fm(sched), 36, y); fitText(g, SET.stations[term].name + ' ゆき', 200, y, 330);
+      if (late) { g.textAlign = 'right'; g.fillStyle = '#ff5a45'; g.font = `700 36px ${FONT}`; g.fillText(`${G.delay.min}分おくれ`, w - 30, y); }
+      y += 140; n++;
     }
   });
 }
@@ -591,8 +607,11 @@ function buildStation(sId) {
       plane(trackSignTex(L, dir, num, sId, dir > 0), 3.2, 1.07, g, cx + dir * 1.6, 4.6, -16, 0);
     }
     // 駅名標
-    for (const f of [1, -1]) plane(nameBoardTex(sId, L, f < 0), 4.8, 1.8, g, cx + f * 0.06, 2.4, 34, f > 0 ? Math.PI / 2 : -Math.PI / 2);
-    for (const f of [1, -1]) box(0.1, 1.9, 4.9, '#8c95a6', cx, 2.4, 34, g);
+    for (const bz of [34, -22]) {
+      for (const f of [1, -1]) plane(nameBoardTex(sId, L, f < 0), 4.8, 1.8, g, cx + f * 0.06, 2.4, bz, f > 0 ? Math.PI / 2 : -Math.PI / 2);
+      box(0.1, 1.9, 4.9, '#8c95a6', cx, 2.4, bz, g);
+    }
+    for (const hz of [-34, 40]) { const nt2 = signTex([[SET.stations[sId].name + ' 駅', SET.stations[sId].kana + ' えき']]); plane(nt2, 3.6, 0.94, g, cx, 4.7, hz + 0.02, 0); plane(signTex([[SET.stations[sId].name + ' 駅', SET.stations[sId].kana + ' えき']]), 3.6, 0.94, g, cx, 4.7, hz - 0.02, Math.PI); }
     // 階段
     const sa = Math.atan2(6, 12);
     const ramp = box(3, 0.3, 13.6, '#bfc4cc', cx, 4 - 0.15 / Math.cos(sa), 12, g); ramp.rotation.x = sa;
@@ -604,8 +623,7 @@ function buildStation(sId) {
       { x0: cx - 2.75, x1: cx - 1.85, z0: 6, z1: 18 }, { x0: cx + 1.85, x1: cx + 2.75, z0: 6, z1: 18 });
     st.stairs.push({ x0: cx - 1.35, x1: cx + 1.35, z0: 5.4, z1: 18.6, cx });
     // 発車標
-    const bt = depBoardTex(sId, L); st.boards.push(bt);
-    plane(bt, 6.4, 3.25, g, cx, 10.5, 5.75, Math.PI);
+    for (const dir of [1, -1]) { const bt = depBoardTex(sId, L, dir); st.boards.push(bt); plane(bt, 3.3, 2.06, g, cx + dir * 1.72, 10.4, 5.75, Math.PI); }
     // ホームの駅員さん
     const sf = makePerson('#1b2a4a', { cap: true, leg: '#1b2a4a' }); sf.position.set(cx - 2.1, 1, 25); sf.rotation.y = Math.PI; g.add(sf);
     st.staff.push({ obj: sf, level: 'lower' });
@@ -640,27 +658,58 @@ const RIDE = { outside: [], plat: new THREE.Group(), signMesh: null, offset: 0, 
   box(3.4, 0.1, 30, '#c7b9a2', 0, 1, 0, g); box(3.4, 0.1, 30, '#f4f4f2', 0, 4.0, 0, g);
   box(0.1, 1.05, 14.2, '#e7e9ee', 1.65, 1.5, -7.9, g); box(0.1, 1.05, 14.2, '#e7e9ee', 1.65, 1.5, 7.9, g); box(0.1, 0.55, 30, '#e7e9ee', 1.65, 3.75, 0, g);
   for (const z of [-12, -6, 6, 12]) box(0.1, 1.5, 0.7, '#e7e9ee', 1.65, 2.75, z, g);
-  for (const z of [-0.95, 0.95]) box(0.14, 2.45, 0.3, '#c9ced6', 1.66, 2.25, z, g);
-  // 車内のドア（駅に着くと開く）
-  const dpan = z => { const d = new THREE.Group(); d.position.set(1.62, 2.22, z); box(0.07, 2.35, 0.8, '#c3c8d0', 0, 0, 0, d); box(0.08, 0.85, 0.5, '#5d7393', 0, 0.45, 0, d); g.add(d); return d; };
+  for (const z of [-0.95, 0.95]) box(0.14, 2.1, 0.3, '#c9ced6', 1.66, 2.1, z, g);
+  // 車内のドア（駅に着くと開く・窓は透明）
+  const glass = new THREE.MeshBasicMaterial({ color: '#cfe6ff', transparent: true, opacity: 0.12, depthWrite: false });
+  const dpan = z => { const d = new THREE.Group(); d.position.set(1.62, 2.1, z);
+    box(0.07, 1.2, 0.8, '#c3c8d0', 0, -0.45, 0, d); box(0.07, 0.25, 0.8, '#c3c8d0', 0, 0.925, 0, d);
+    box(0.07, 0.65, 0.12, '#c3c8d0', 0, 0.475, -0.34, d); box(0.07, 0.65, 0.12, '#c3c8d0', 0, 0.475, 0.34, d);
+    const gl = new THREE.Mesh(new THREE.PlaneGeometry(0.56, 0.65), glass); gl.rotation.y = -Math.PI / 2; gl.position.set(-0.01, 0.475, 0); d.add(gl);
+    g.add(d); return d; };
   RIDE.door = { l: dpan(-0.4), r: dpan(0.4), p: 0 };
   box(0.1, 3, 30, '#e7e9ee', -1.7, 2.5, 0, g);
-  box(0.7, 0.45, 26, '#4f6fa8', 1.25, 1.35, 0, g); box(0.15, 0.6, 26, '#4f6fa8', 1.55, 1.75, 0, g);
+  for (const sz of [-7.15, 7.15]) { box(0.7, 0.45, 11.7, '#4f6fa8', 1.25, 1.35, sz, g); box(0.15, 0.6, 11.7, '#4f6fa8', 1.55, 1.75, sz, g); }
+  // ドアの上の表示
+  RIDE.panelTex = canvasTex(1280, 320, drawPanel);
+  plane(RIDE.panelTex, 3.2, 0.8, g, 1.57, 3.56, 0, -Math.PI / 2);
   for (const z of [-9, -3, 3, 9]) box(0.08, 3, 0.08, '#c9ced6', 0.9, 2.5, z, g);
   box(0.6, 0.05, 28, '#fff8d8', 0, 3.94, 0, g);
-  [['#6d8fb8', -4.5], ['#c46b6b', 2.2], ['#7fae7a', 6.8]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.15, 0.65, z); p.rotation.y = -Math.PI / 2; p.scale.setScalar(1); g.add(p); });
+  [['#6d8fb8', -5.6], ['#c46b6b', 4.2], ['#7fae7a', 8.6]].forEach(([c, z]) => { const p = makePerson(c); p.position.set(1.15, 0.9, z); p.rotation.y = -Math.PI / 2; sitPose(p); g.add(p); });
+  RIDE.me = makePerson('#f07a2a', { bag: '#2c3f66' }); RIDE.me.position.set(1.15, 0.9, -2.5); RIDE.me.rotation.y = -Math.PI / 2; sitPose(RIDE.me); RIDE.me.visible = false; g.add(RIDE.me);
   box(400, 0.2, 400, '#9aa58e', 0, -0.4, 0, g);
   let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 40; i++) { const h = 3 + rnd() * 16, w = 4 + rnd() * 6; const z0 = -150 + i * 7.5; const b = building(g, 10 + rnd() * 40, z0, w, h + 3, i); b.position.y = -0.3; b.userData.z0 = z0; RIDE.outside.push(b); }
   for (let i = 0; i < 24; i++) { const p = box(0.2, 5, 0.2, '#666b75', 4.5, 2.5, 0, g); p.userData.z0 = -150 + i * 12.5; RIDE.outside.push(p); }
   box(5, 1, 60, '#cfcabe', 5.2, 0.5, 0, RIDE.plat); box(0.35, 0.02, 60, '#f2c21a', 3.2, 1.01, 0, RIDE.plat);
-  for (let z = -24; z <= 24; z += 12) box(0.3, 4, 0.3, '#8c95a6', 6.5, 3, z, RIDE.plat);
+  for (const z of [-18, -6, 6, 18]) box(0.3, 4, 0.3, '#8c95a6', 6.5, 3, z, RIDE.plat);
   g.add(RIDE.plat); RIDE.plat.visible = false;
 }
 function setRideSign(s, L) {
   if (RIDE.shown === s) return; RIDE.shown = s;
   if (RIDE.signMesh) { RIDE.plat.remove(RIDE.signMesh); RIDE.signMesh.material.map.dispose(); RIDE.signMesh.material.dispose(); RIDE.signMesh.geometry.dispose(); }
-  RIDE.signMesh = plane(nameBoardTex(s, L, false), 4.8, 1.8, RIDE.plat, 6.3, 2.4, 2, -Math.PI / 2);
+  RIDE.signMesh = plane(nameBoardTex(s, L, false), 4.4, 1.65, RIDE.plat, 7.2, 2.5, 0, -Math.PI / 2);
+}
+function drawPanel(g, w, h) {
+  g.fillStyle = '#1f2b45'; g.fillRect(0, 0, w, h);
+  const S = RIDE.ps; if (!S) return;
+  const L = S.L, st = LN(L).stations, col = LN(L).color;
+  g.fillStyle = col; g.fillRect(0, 0, w, 62);
+  g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 38px ${FONT}`;
+  g.fillText(SET.lines[L].name + '　' + SET.stations[termName(L, S.dir)].name + ' ゆき', 24, 45);
+  g.textAlign = 'right'; g.fillText('いま ' + fm(G.t), w - 24, 45);
+  g.textAlign = 'left'; g.fillStyle = '#ffd27a'; g.font = `700 44px ${FONT}`;
+  g.fillText(S.stopped ? (S.end ? 'しゅうてん' : 'ただいま') : 'つぎは', 36, 150);
+  const nm = SET.stations[st[S.i]]; nameKana(g, nm.name, nm.kana, 640, 152, 90, '#fff', '#cfd8ff');
+  const order = S.dir > 0 ? st : [...st].reverse(), n = order.length, x0 = 70, x1 = w - 70, y = 238;
+  g.strokeStyle = col; g.lineWidth = 8; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+  const ci = order.indexOf(st[S.i]);
+  order.forEach((s, j) => {
+    const x = x0 + (x1 - x0) * j / (n - 1), cur = j === ci;
+    g.beginPath(); g.arc(x, y, cur ? 18 : 12, 0, 7); g.fillStyle = cur ? '#ffd27a' : (j < ci ? '#6b7690' : '#fff'); g.fill(); g.lineWidth = 5; g.strokeStyle = col; g.stroke();
+    g.textAlign = 'center'; g.fillStyle = cur ? '#ffd27a' : (j < ci ? '#8a93a8' : '#fff'); g.font = `${cur ? 700 : 400} 28px ${FONT}`;
+    fitText(g, SET.stations[s].name, x, y + 56, (x1 - x0) / (n - 1) - 8);
+  });
+  if (S.dir) { g.fillStyle = '#ffd27a'; g.font = `700 30px ${FONT}`; g.textAlign = 'right'; g.fillText('すすむ むき ▶', x1, y - 30); }
 }
 
 /* =========================================================
@@ -691,6 +740,7 @@ const ICON = {
   board: '<svg viewBox="0 0 52 52"><rect x="4" y="6" width="44" height="40" rx="10" fill="#1f9d55"/><text x="26" y="33" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">のる</text></svg>',
   staff: '<svg viewBox="0 0 70 70"><circle cx="35" cy="26" r="13" fill="#f2cfa8"/><rect x="20" y="9" width="30" height="9" rx="3" fill="#1b2a4a"/><rect x="18" y="16" width="34" height="4" fill="#1b2a4a"/><path d="M14 68c0-16 9-26 21-26s21 10 21 26z" fill="#1b2a4a"/></svg>',
   phone: '<svg viewBox="0 0 52 52"><rect x="14" y="3" width="24" height="46" rx="5" fill="#2c3f66"/><rect x="17" y="8" width="18" height="32" fill="#eef3ff"/><rect x="19" y="12" width="14" height="4" fill="#1f9d55"/><rect x="19" y="19" width="10" height="4" fill="#1f9d55"/></svg>',
+  clock: '<svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" fill="#fff" stroke="#2c3f66" stroke-width="4"/><path d="M26 12v14l9 6" stroke="#2c3f66" stroke-width="4" fill="none" stroke-linecap="round"/></svg>',
   meter: '<svg viewBox="0 0 52 52"><rect x="3" y="20" width="46" height="12" rx="6" fill="#e3e8f1"/><rect x="3" y="20" width="30" height="12" rx="6" fill="#d8432f"/><path d="M36 6l6 8h-12z" fill="#d8432f"/></svg>',
 };
 const HOWTO = [
@@ -698,8 +748,8 @@ const HOWTO = [
   [ICON.sign, '{案内板|あんないばん}の「{番線|ばんせん}」と「{方面|ほうめん}」を {見|み}て、ホームへ。{右下|みぎした}の「{案内|あんない}」で のりかえ{案内|あんない}を {見|み}なおせる。'],
   [ICON.board, 'ドアが {開|ひら}いたら「のる」。{車内|しゃない}の{表示|ひょうじ}を {見|み}て、おりる{駅|えき}で「おりる」。'],
   [ICON.staff, '{駅員|えきいん}さんの {近|ちか}くで「きく」。どの{電車|でんしゃ}に のればよいか おしえてくれる。'],
-  [ICON.phone, 'まちがえたり おくれそうな ときは「{連絡|れんらく}」。だれ・どこ・{何分|なんぷん}・どうするか を つたえる。'],
-  [ICON.meter, '{困|こま}り{度|ど}：トラブルの あと、{連絡|れんらく}が おそいほど {早|はや}く ふえる。{早|はや}く・わかりやすく つたえると ゆっくりになる。'],
+  [ICON.phone, 'まちがえたり おくれそうな ときは、すぐ「{連絡|れんらく}」。だれ・どこ・おくれること・どうするか を つたえる。'],
+  [ICON.clock, '{左上|ひだりうえ}に いまの {時刻|じこく}。のりかえ{案内|あんない}の {時刻|じこく}と くらべよう。'],
 ];
 function renderHowto(el) { el.innerHTML = HOWTO.map(([ic, t]) => `<div class="how">${ic}<div>${rb(t)}</div></div>`).join(''); }
 renderHowto($('#howto1')); renderHowto($('#howto2'));
@@ -708,10 +758,13 @@ function renderChoices() {
   const sc = [['school', '{学校|がっこう}へ{行|い}く', '{担任|たんにん}の{先生|せんせい}に {連絡|れんらく}'], ['work', '{職場|しょくば}{体験|たいけん}', '{職場|しょくば}の{人|ひと}に {連絡|れんらく}']];
   $('#chScene').innerHTML = sc.map(([k, a, b]) => `<button class="choice ${G.sceneKey === k ? 'sel' : ''}" data-k="${k}"><b>${rb(a)}</b>${rb(b)}</button>`).join('');
   const lv = [[1, 'レベル1', '{乗|の}りかえなし（1つの{電車|でんしゃ}）'], [2, 'レベル2', '{乗|の}りかえ 1{回|かい}']];
+  const md = [[false, 'ふつう', 'まちがえることも できる'], [true, 'かんたん', '{駅員|えきいん}さんが まちがいを とめてくれる（{決|き}まったトラブルだけ おきる）']];
+  $('#chMode').innerHTML = md.map(([k, a, b]) => `<button class="choice ${G.easy === k ? 'sel' : ''}" data-m="${k}"><b>${a}</b>${rb(b)}</button>`).join('');
   $('#chLevel').innerHTML = lv.map(([k, a, b]) => `<button class="choice ${G.level === k ? 'sel' : ''}" data-l="${k}"><b>${a}</b>${rb(b)}</button>`).join('');
 }
 renderChoices();
 $('#chScene').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) { G.sceneKey = b.dataset.k; SND.tap(); renderChoices(); } });
+$('#chMode').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { G.easy = b.dataset.m === 'true'; SND.tap(); renderChoices(); } });
 $('#chLevel').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (b) { G.level = +b.dataset.l; SND.tap(); renderChoices(); } });
 
 function openOv(id) { $('#' + id).hidden = false; G.modals.add(id); }
@@ -768,15 +821,15 @@ function renderPlan(first) {
   const story = G.sceneKey === 'school'
     ? `{今日|きょう}は {電車|でんしゃ}で {学校|がっこう}へ {行|い}きます。${fm(P.deadline)}までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}れば、{朝|あさ}の{会|かい}に {間|ま}に{合|あ}います。`
     : `{今日|きょう}は {職場|しょくば}{体験|たいけん}。{電車|でんしゃ}で お{店|みせ}へ {行|い}きます。${fm(P.deadline)}までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}れば、{仕事|しごと}の{始|はじ}まりに {間|ま}に{合|あ}います。`;
-  $('#planStory').innerHTML = rb(story);
+  $('#planStory').innerHTML = `<div class="nowline">${rb('いまの {時刻|じこく}')}　${fm(G.t)}</div><br>` + rb(story);
   let h = '';
   P.legs.forEach((leg, n) => {
     const col = LN(leg.L).color;
-    h += `<div class="leg"><div class="tm">${fm(leg.dep)}<div style="font-size:13px;font-weight:400">${rb('{発|はつ}')}</div></div><div class="node"></div><div class="stn">${rb(sn(leg.from))}${n ? rb(' <span style="font-size:15px;color:#d8432f">{乗|の}りかえ</span>') : ''}</div></div>`;
-    h += `<div class="leg"><div></div><div class="bar" style="background:${col}"></div><div class="ride"><span class="chip" style="background:${col}">${rb(ln(leg.L))}</span>${rb(sn(termName(leg.L, leg.dir)))}${rb('{方面|ほうめん}')}<br><span class="trk">${leg.track}${rb('{番線|ばんせん}')}</span>　${rb(`${leg.stops}{駅|えき}　（${minTxt(Math.round(leg.arr - leg.dep))}）`)}</div></div>`;
+    h += `<div class="leg"><div class="tm">${fm(leg.dep)}<small>${rb('{発|はつ}')}</small></div><div class="node"></div><div class="stn">${rb(sn(leg.from))}${n ? rb(' <span style="font-size:15px;color:#d8432f">{乗|の}りかえ</span>') : ''}</div></div>`;
+    h += `<div class="leg"><div></div><div class="bar" style="background:${col}"></div><div class="ride"><div><span class="chip" style="background:${col}">${rb(ln(leg.L))}</span> ${rb(sn(termName(leg.L, leg.dir)))} ${rb('{方面|ほうめん}')}</div><div class="mt">のりば　<span class="trk">${leg.track}${rb('{番線|ばんせん}')}</span></div><div class="mt">${rb(`${leg.stops}{駅|えき}　（${minTxt(Math.round(leg.arr - leg.dep))}）`)}</div></div></div>`;
   });
   const last = P.legs[P.legs.length - 1];
-  h += `<div class="leg"><div class="tm">${fm(last.arr)}<div style="font-size:13px;font-weight:400">${rb('{着|ちゃく}')}</div></div><div class="node"></div><div class="stn">${rb(sn(last.to))}</div></div>`;
+  h += `<div class="leg"><div class="tm">${fm(last.arr)}<small>${rb('{着|ちゃく}')}</small></div><div class="node"></div><div class="stn">${rb(sn(last.to))}</div></div>`;
   h += `<div class="deadline">${rb(`${fm(P.deadline)} までに ${sn(G.mission.to)}{駅|えき}の {改札|かいさつ}を {出|で}る`)}</div>`;
   $('#planBody').innerHTML = h;
   $('#btnPlanClose').textContent = first ? 'しゅっぱつ' : 'とじる';
@@ -797,7 +850,7 @@ function openPhone(incoming) {
   PH = { incoming, sel: {}, rows: [
     { key: 'name', lab: 'だれ？（{名前|なまえ}）', opts: [{ txt: `${school}${me}です`, ok: true }, NONE] },
     { key: 'where', lab: 'いま どこ？', opts: [...shuffle([where, ...others]), NONE] },
-    { key: 'late', lab: 'どのくらい おくれそう？', opts: [5, 10, 20, 30].map(n => ({ txt: `${minTxt(n)}くらい おくれます`, ok: true, n })).concat([NONE]) },
+    { key: 'late', lab: 'おくれることを つたえる', opts: [{ txt: '{少|すこ}し おくれます', ok: true }, { txt: 'おくれます（{何分|なんぷん}かは わかりません）', ok: true }, NONE] },
     { key: 'plan', lab: 'これから どうする？', opts: [{ txt: '{次|つぎ}の {電車|でんしゃ}で {向|む}かいます', ok: true }, { txt: '{駅員|えきいん}さんに きいて {向|む}かいます', ok: true }, { txt: 'このまま {電車|でんしゃ}に のっています', ok: false }, NONE] },
   ] };
   $('#phWho').innerHTML = rb(`${contactMk()} ${incoming ? 'から {電話|でんわ}' : 'に {連絡|れんらく}'}`);
@@ -827,9 +880,9 @@ function report(items, incoming) {
     const late = items.find(i => i.key === 'late');
     G.reports.push({ t: G.t, q, est: late && late.n, incoming, sinceTrouble: G.t - G.lastTroubleT });
     const miss = items.filter(i => !i.ok).map(i => i.key);
-    const need = { name: 'だれから？ {名前|なまえ}も {言|い}ってね', where: 'いま どこに いるの？', late: '{何分|なんぷん}くらい おくれそう？', plan: 'これから どうするの？' };
+    const need = { name: 'だれから？ {名前|なまえ}も {言|い}ってね', where: 'いま どこに いるの？', late: 'おくれそうなの？', plan: 'これから どうするの？' };
     if (q === 4) msg = G.sceneKey === 'school' ? 'よく わかりました。{連絡|れんらく}ありがとう。あわてず、{気|き}をつけて {来|き}てね。' : 'ご{連絡|れんらく} ありがとうございます。よく わかりました。{気|き}をつけて {来|き}てください。';
-    else msg = 'わかった、ありがとう。でも…<br>' + miss.map(k => '・' + need[k]).join('<br>') + '<br><span style="font-size:15px;color:#5b6b88">（つたえることが そろうほど、{困|こま}り{度|ど}が ふえにくくなります）</span>';
+    else msg = 'わかった、ありがとう。でも…<br>' + miss.map(k => '・' + need[k]).join('<br>') + '<br><span style="font-size:15px;color:#5b6b88">（つたえることが そろうと、まっている {人|ひと}が あんしんします）</span>';
     SND.ok();
   }
   $('#rpWho').innerHTML = rb(contactMk());
@@ -890,13 +943,15 @@ function finish(timeout) {
   ];
   if (r1 && r1.est && !timeout) rows.push(['おくれの よそう', `${minTxt(r1.est)} → じっさい ${minTxt(Math.ceil(late))}`]);
   $('#resList').innerHTML = rows.map(([a, b]) => `<dt>${rb(a)}</dt><dd>${rb(b)}</dd>`).join('');
-  const mx = Math.max(actual, worst, 1);
-  const bar = (lab, v, c) => `<div class="brow"><span>${rb(lab)}</span><div class="btrack"><i style="width:${(v / mx * 100).toFixed(1)}%;background:${c}"></i></div><b>${Math.round(v)}</b></div>`;
-  $('#resBars').innerHTML = hadT
-    ? bar('あなた', actual, '#2c3f66') + bar('すぐに 4つ つたえたら', best, '#1f9d55') + bar('{自分|じぶん}から {連絡|れんらく}しなかったら', worst, '#d8432f')
-    : `<p>${rb('トラブルが なかったので {困|こま}り{度|ど}は 0。つぎは レベルを かえて ためしてみよう。')}</p>`;
+  let feel;
+  if (!hadT) feel = 'トラブルは ありませんでした。';
+  else if (!r1) feel = `${contactMk()}は {連絡|れんらく}が なくて、とても {心配|しんぱい}しました。`;
+  else if (r1.incoming) feel = `${contactMk()}は {心配|しんぱい}して、{自分|じぶん}から {電話|でんわ}を かけました。`;
+  else if (r1.sinceTrouble <= 3) feel = `すぐに {連絡|れんらく}できました。${contactMk()}は あんしんして まっていました。`;
+  else feel = `{連絡|れんらく}が {少|すこ}し おそかったので、${contactMk()}は {心配|しんぱい}しました。`;
+  $('#resBars').innerHTML = `<div class="feel">${rb(feel)}</div>`;
   $('#resLesson').innerHTML = rb(hadT
-    ? `トラブルは だれにでも おきます。{大切|たいせつ}なのは そのあと。<b>{早|はや}く</b>・<b>わかりやすく</b>（だれ・どこ・{何分|なんぷん}・どうする）つたえると、まっている {人|ひと}の {困|こま}り{度|ど}は {小|ちい}さくなります。わからない ときは {駅員|えきいん}さんに {相談|そうだん}しよう。`
+    ? `トラブルは だれにでも おきます。{大切|たいせつ}なのは そのあと。<b>{早|はや}く</b>・<b>わかりやすく</b>（だれ・どこ・おくれること・どうする）つたえると、まっている {人|ひと}が あんしんできます。わからない ときは {駅員|えきいん}さんに {相談|そうだん}しよう。`
     : `{乗|の}りかえ{案内|あんない}を {読|よ}んで、{予定|よてい}どおりに {着|つ}けました。もしも のときは「{早|はや}く {連絡|れんらく}」を {思|おも}い{出|だ}そう。`);
   $('#hud').hidden = true; $('#doze').hidden = true;
   openOv('ovResult');
@@ -921,7 +976,7 @@ function startMission() {
   }
   buildStation(m.from);
   Object.assign(G.P, { x: -12.5, y: 7, z: 0, level: 'upper', onStair: false, face: Math.PI / 2, vx: 0, vz: 0, spd: 0 });
-  G.cam.yaw = 0; G.phase = 'station';
+  G.cam.yaw = 0; G.phase = 'station'; easyGuide();
   $('#hud').hidden = false; $('#led').hidden = true; $('#banner').hidden = true; $('#btnPhone').classList.remove('ring');
   $('#tGoal').innerHTML = rb(`${fm(G.plan.deadline)}までに ${sn(m.to)}{駅|えき}の{改札|かいさつ}を{出|で}る`);
   renderPlan(true); openOv('ovPlan');
@@ -1010,7 +1065,15 @@ function nearStaff() {
   return station.staff.find(s => s.level === P.level && !P.onStair && Math.hypot(s.obj.position.x - P.x, s.obj.position.z - P.z) < 2.8);
 }
 
+function easyStop(msg) {
+  $('#stSay').innerHTML = rb(`「${msg}」`);
+  $('#stOpts').innerHTML = `<button class="big-btn">わかった</button>`;
+  $('#stOpts').firstChild.onclick = () => closeOv('ovStaff');
+  openOv('ovStaff');
+}
+function easyGuide() { if (!G.easy || !station) return; const c = correctBoard(station.id); if (c) setGuide(c.line, c.dir); }
 function board(tr) {
+  if (G.easy) { const cb = correctBoard(station.id); if (!cb || cb.line !== tr.L || cb.dir !== tr.dir) { easyStop(`この {電車|でんしゃ}は ${sn(termName(tr.L, tr.dir))} ゆきです。<br>のりかえ{案内|あんない}の {電車|でんしゃ}と ちがいますよ。`); return; } }
   const c = tr.cur;
   G.ride = { L: tr.L, dir: tr.dir, k: c.k, i: tr.idx, boardedAt: tr.idx, wrongCounted: false };
   if (G.lastAlight && G.lastAlight.L === tr.L && G.lastAlight.dir === tr.dir && G.lastAlight.k === c.k) G.lastAlight = null;
@@ -1021,18 +1084,20 @@ function alight(forced) {
   const R = G.ride; const s = LN(R.L).stations[R.i];
   const c = correctBoard(s);
   const contOk = !forced && R.i !== R.boardedAt && c && c.line === R.L && c.dir === R.dir && !R.wrongCounted;
+  if (G.easy && contOk) { easyStop(`ここは ${sn(s)}です。おりる {駅|えき}は ${sn(LN(R.L).stations[targetIdx(R.L)])}ですよ。`); return; }
   G.lastAlight = contOk ? { L: R.L, dir: R.dir, k: R.k, i: R.i } : null;
   const leg = G.plan.legs[G.legIdx]; if (leg && s === leg.to) G.legIdx++;
   const L = R.L, dir = R.dir; G.ride = null;
   enterStationFromTrain(s, L, dir);
-  if (forced) banner('{終点|しゅうてん}です。{電車|でんしゃ}を おりました', 'info', 4);
+  if (forced) banner(`{終点|しゅうてん}の ${sn(s)}です。{電車|でんしゃ}を おりました`, 'info', 4);
+  else banner(`${sn(s)}{駅|えき}で おりました`, 'info', 3);
 }
 function enterStationFromTrain(s, L, dir) {
   buildStation(s); station.group.visible = true; player.visible = true;
   const tr = station.tracks.find(t => t.L === L && t.dir === dir);
   Object.assign(G.P, { x: tr.cx + dir * 2.3, y: 1, z: -8, level: 'lower', onStair: false, face: dir > 0 ? -Math.PI / 2 : Math.PI / 2, vx: 0, vz: 0, spd: 0 });
   G.cam.yaw = Math.PI / 2; G.phase = 'station'; $('#led').hidden = true;
-  updateTrains();
+  updateTrains(); easyGuide();
 }
 function rideDepart(i) {
   const R = G.ride; const s = LN(R.L).stations[i]; const c = correctBoard(s);
@@ -1085,6 +1150,7 @@ function update(dtReal) {
 
   if (G.phase === 'station') {
     // 手前でおりた電車が出ていった
+    if (G.easy && G.onPlan) { const leg = G.plan.legs[G.legIdx]; if (leg && !leg.warned && G.t >= leg.plat - 2) { leg.warned = true; banner(`もうすぐ ${leg.track}{番線|ばんせん}に {電車|でんしゃ}が きます。いそごう！`, 'info', 5); } }
     if (G.lastAlight) { const a = G.lastAlight; if (G.t >= depT(a.L, a.dir, a.k, a.i)) { G.lastAlight = null; trouble('early'); } }
     const P = G.P, { jx, jy } = G.input; const mag = Math.min(1, Math.hypot(jx, jy));
     let tvx = 0, tvz = 0;
@@ -1112,6 +1178,7 @@ function update(dtReal) {
     while (guard++ < 20) {
       const arr = arrT(R.L, R.dir, R.k, R.i), dep = arr + CFG.dwellMin;
       if (R.i === endIdx(R.L, R.dir)) { if (G.t >= arr + 0.15 && !G.dozing) { alight(true); return; } break; }
+      if (G.easy && !G.dozing && !R.wrongCounted && R.i === targetIdx(R.L) && R.i !== R.boardedAt && G.t >= arr && G.t >= dep - 0.12) { alight(true); banner('{駅員|えきいん}さん「ここで おりますよ！」', 'info', 4); return; }
       if (G.t >= dep) { rideDepart(R.i); R.i += R.dir; continue; }
       break;
     }
@@ -1137,44 +1204,30 @@ function updateRideView(dtReal) {
   const stopped = G.t >= arr;
   let speed = 0;
   if (!stopped) speed = 38 * Math.max(0.12, Math.min(1, (G.t - depPrev) / 0.35, (arr - G.t) / 0.35));
-  RIDE.offset += speed * dtReal * (G.ff ? 2 : 1);
+  RIDE.offset += speed * dtReal * (G.ff ? 2 : 1) * R.dir;
   for (const b of RIDE.outside) b.position.z = ((b.userData.z0 - RIDE.offset) % 300 + 300) % 300 - 150;
-  // ホーム
+  // ホーム（すすむ向きの前から来て、うしろへ去る）
   let pz = null, ps = null;
   if (stopped) { pz = 0; ps = st[R.i]; }
-  else if (hasPrev && G.t - depPrev < 0.35) { pz = -Math.pow((G.t - depPrev) / 0.35, 2) * 70; ps = st[prevI]; }
-  else if (arr - G.t < 0.35) { pz = Math.pow((arr - G.t) / 0.35, 2) * 70; ps = st[R.i]; }
+  else if (hasPrev && G.t - depPrev < 0.35) { pz = -R.dir * Math.pow((G.t - depPrev) / 0.35, 2) * 70; ps = st[prevI]; }
+  else if (arr - G.t < 0.35) { pz = R.dir * Math.pow((arr - G.t) / 0.35, 2) * 70; ps = st[R.i]; }
   const dt = RIDE.door, tg = stopped && !G.dozing ? 1 : 0;
   dt.p = tg > dt.p ? Math.min(1, dt.p + dtReal / 0.8) : Math.max(0, dt.p - dtReal / 0.8);
   const e = dt.p * dt.p * (3 - 2 * dt.p) * 0.75; dt.l.position.z = -0.4 - e; dt.r.position.z = 0.4 + e;
   RIDE.plat.visible = pz != null; if (ps) { RIDE.plat.position.z = pz; setRideSign(ps, L); }
-  // 車内表示
-  const term = termName(L, R.dir);
-  const key = `${R.i}|${stopped}|${G.dozing}`;
+  // ドアの上の表示
+  const key = `${R.i}|${stopped}|${fm(G.t)}|${R.dir}`;
   if (key !== ledKey) {
-    ledKey = key;
-    if (stopped) SND.door();
-    const head = stopped ? `${sn(st[R.i])}` : `つぎは　${sn(st[R.i])}`;
-    const sub = stopped ? (R.i === endIdx(L, R.dir) ? '{終点|しゅうてん}です' : 'ドアが {開|ひら}いています') : `${ln(L)}　${sn(term)} ゆき`;
-    const order = R.dir > 0 ? st : [...st].reverse();
-    const route = order.map(s => { const i = st.indexOf(s); const cls = i === R.i ? (stopped ? 'now' : 'next') : ''; return `<div class="st ${cls}"><div class="dot"></div>${rb(sn(s))}</div>`; }).join('');
-    $('#led').style.setProperty('--lc', LN(L).color);
-    $('#led').innerHTML = `<div class="big">${rb(head)}</div><div class="sub">${rb(sub)}</div><div class="route" style="--lc:${LN(L).color}">${route}</div>`;
+    const first = !ledKey.startsWith(`${R.i}|${stopped}|`); ledKey = key;
+    RIDE.ps = { L, dir: R.dir, i: R.i, stopped, end: R.i === endIdx(L, R.dir) }; redraw(RIDE.panelTex);
+    if (first && stopped) { SND.door(); if (G.easy && !G.dozing && !R.wrongCounted && R.i === targetIdx(L) && R.i !== R.boardedAt) banner('ここで おりよう！「おりる」を おそう', 'info', 5); }
   }
-  $('#led').hidden = G.dozing;
+  RIDE.me.visible = G.dozing;
+  if (G.dozing) RIDE.me.userData.head.rotation.x = 0.55 + Math.sin(G.elapsed * 1.8) * 0.18;
+  $('#led').hidden = true;
 }
 function updateHUD() {
   $('#tNow').textContent = fm(G.t);
-  const showDmg = G.damage + (G.exitT == null ? 0 : 0);
-  $('#mVal').textContent = Math.round(showDmg);
-  const f = $('#mFill'); const pct = Math.min(100, showDmg / CFG.meterMax * 100); f.style.width = pct + '%';
-  f.style.background = pct < 30 ? '#1f9d55' : pct < 60 ? '#e6a700' : '#d8432f';
-  const rate = $('#mRate');
-  let rt, bad = false;
-  if (G.firstTroubleT == null) rt = 'いまは ふえていない';
-  else if (!G.reportedOk) { rt = 'ふえかた：<b>●●● はやい</b><br>（まだ {連絡|れんらく}していない）'; bad = true; }
-  else { const r = CFG.rateByQuality[G.quality]; rt = `ふえかた：${r <= 0.3 ? '● ゆっくり' : r <= 1 ? '●● ふつう' : '●●● はやめ'}（{連絡|れんらく}ずみ）`; }
-  const key = rt; if (rate.dataset.k !== key) { rate.dataset.k = key; rate.innerHTML = rb(rt); rate.className = bad ? 'bad' : ''; }
   $('#btnFF').classList.toggle('on', G.ff);
   // ボタン
   const act = $('#btnAct'); let a = null;
